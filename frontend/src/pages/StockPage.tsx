@@ -164,7 +164,15 @@ export function StockPage() {
             <li key={p.id} className="rounded-lg p-4 surface">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-bold uppercase tracking-wide text-heading">{p.nombre}</p>
+                  <p className="font-bold uppercase tracking-wide text-heading">
+                    {p.nombre}
+                    {proximo && (
+                      <span className={`ml-2 text-xs font-normal normal-case ${fmtVencimiento(proximo.fechaVencimiento!).color}`}>
+                        venc. {fmtVencimiento(proximo.fechaVencimiento!).texto}
+                        {lotes.length > 1 && ` (+${lotes.length - 1} más)`}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-sm text-secondary">
                     {p.stockActual} {p.unidad} <span className="text-muted">· mínimo {p.stockMinimo}</span>
                   </p>
@@ -201,17 +209,16 @@ export function StockPage() {
               </div>
 
               <div className="mt-3 flex items-center justify-between border-t pt-2 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
-                <button
-                  onClick={() => toggleExpandido(p.id)}
-                  className="text-xs font-bold uppercase tracking-wide link-accent"
-                >
-                  {expandido ? '▾' : '▸'} Vencimientos {lotes.length > 0 ? `(${lotes.length})` : ''}
-                  {!expandido && proximo && (
-                    <span className={`ml-2 font-normal normal-case ${fmtVencimiento(proximo.fechaVencimiento!).color}`}>
-                      próx. {fmtVencimiento(proximo.fechaVencimiento!).texto}
-                    </span>
-                  )}
-                </button>
+                {lotes.length > 0 ? (
+                  <button
+                    onClick={() => toggleExpandido(p.id)}
+                    className="text-xs font-bold uppercase tracking-wide link-accent"
+                  >
+                    {expandido ? '▾' : '▸'} Ver lotes ({lotes.length})
+                  </button>
+                ) : (
+                  <span className="text-xs text-muted">Sin vencimiento registrado</span>
+                )}
                 <button
                   onClick={() => setAgregandoLoteId(agregandoLoteId === p.id ? null : p.id)}
                   className="text-xs font-bold uppercase tracking-wide link-accent"
