@@ -71,27 +71,27 @@ export function ProveedorDetailPage() {
 
   return (
     <div className="mx-auto max-w-lg p-4">
-      <Link to="/proveedores" className="mb-3 inline-block text-sm text-violet-600 dark:text-violet-400">
+      <Link to="/proveedores" className="mb-3 inline-block text-sm font-bold link-accent">
         ← Proveedores
       </Link>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">{proveedor.nombre}</h2>
+          <h2 className="heading-display text-xl">{proveedor.nombre}</h2>
           {proveedor.telefono && <p className="text-sm text-secondary">{proveedor.telefono}</p>}
         </div>
         <button
           onClick={openNuevaCompra}
-          className="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white active:bg-violet-700 dark:bg-violet-500 dark:active:bg-violet-600"
+          className="rounded-md px-4 py-2 text-sm font-bold uppercase tracking-wide btn-primary"
         >
           + Compra
         </button>
       </div>
 
-      <h3 className="mb-2 mt-6 text-sm font-semibold text-secondary">Historial de compras</h3>
-      <ol className="relative flex flex-col gap-4 border-l pl-4 border-slate-200 dark:border-slate-800">
+      <h3 className="heading-display mb-2 mt-6 text-sm">Historial de compras</h3>
+      <ol className="relative flex flex-col gap-4 border-l-2 pl-4 border-[#17140F] dark:border-[#EDE6D6]">
         {proveedor.compras?.map((c) => (
           <li key={c.id} className="relative">
-            <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[#17140F] dark:bg-[#EDE6D6]" />
             <p className="text-xs text-muted">{fmtFecha(c.fecha)}</p>
             <ul className="mt-1 text-sm text-heading">
               {c.items.map((it) => (
@@ -109,10 +109,10 @@ export function ProveedorDetailPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-2xl surface">
-            <h3 className="mb-4 text-base font-semibold">Nueva compra a {proveedor.nombre}</h3>
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-lg surface">
+            <h3 className="heading-display mb-4 text-base">Nueva compra a {proveedor.nombre}</h3>
 
-            {error && <p className="mb-3 rounded-lg p-3 text-sm error-banner">{error}</p>}
+            {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
             <p className="mb-2 text-sm font-medium text-label">Productos</p>
             <div className="flex flex-col gap-2">
@@ -123,7 +123,7 @@ export function ProveedorDetailPage() {
                     <select
                       value={it.productoId}
                       onChange={(e) => updateItem(idx, { productoId: e.target.value })}
-                      className="flex-1 rounded-lg border px-2 py-2 text-sm field-input"
+                      className="flex-1 rounded-md px-2 py-2 text-sm field-input"
                     >
                       <option value="">Producto</option>
                       {productos.map((p) => (
@@ -139,12 +139,12 @@ export function ProveedorDetailPage() {
                       placeholder={producto?.unidad ?? 'cant.'}
                       value={it.cantidad}
                       onChange={(e) => updateItem(idx, { cantidad: e.target.value })}
-                      className="w-24 rounded-lg border px-2 py-2 text-sm field-input"
+                      className="w-24 rounded-md px-2 py-2 text-sm field-input"
                     />
                     {items.length > 1 && (
                       <button
                         onClick={() => removeItem(idx)}
-                        className="rounded-full px-2.5 py-1.5 text-sm surface-muted text-secondary"
+                        className="rounded-md px-2.5 py-1.5 text-sm surface-muted text-secondary"
                       >
                         ✕
                       </button>
@@ -153,20 +153,20 @@ export function ProveedorDetailPage() {
                 )
               })}
             </div>
-            <button onClick={addItem} className="mt-2 text-sm font-medium text-violet-600 dark:text-violet-400">
+            <button onClick={addItem} className="mt-2 text-sm font-bold link-accent">
               + Agregar producto
             </button>
 
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => setShowForm(false)}
-                className="flex-1 rounded-lg py-2.5 text-sm font-semibold surface-muted text-label"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-label"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white dark:bg-violet-500"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary"
               >
                 Registrar compra
               </button>

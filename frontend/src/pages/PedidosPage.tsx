@@ -80,20 +80,17 @@ export function PedidosPage() {
   return (
     <div className="mx-auto max-w-lg p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-heading">Pedidos</h2>
-        <button
-          onClick={openNuevo}
-          className="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white active:bg-violet-700 dark:bg-violet-500 dark:active:bg-violet-600"
-        >
+        <h2 className="heading-display text-lg">Pedidos</h2>
+        <button onClick={openNuevo} className="rounded-md px-4 py-2 text-sm font-bold uppercase tracking-wide btn-primary">
           + Pedido
         </button>
       </div>
 
       <ul className="flex flex-col gap-3">
         {pedidos.map((pe) => (
-          <li key={pe.id} className="rounded-xl border p-4 shadow-sm surface">
+          <li key={pe.id} className="rounded-lg p-4 surface">
             <div className="flex items-start justify-between">
-              <p className="font-medium">{pe.cliente.nombre}</p>
+              <p className="font-bold uppercase tracking-wide text-heading">{pe.cliente.nombre}</p>
               <span className="text-xs text-muted">{fmtFecha(pe.fecha)}</span>
             </div>
             <ul className="mt-2 space-y-0.5 text-sm text-secondary">
@@ -112,17 +109,17 @@ export function PedidosPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-2xl surface">
-            <h3 className="mb-4 text-base font-semibold">Nuevo pedido</h3>
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-lg surface">
+            <h3 className="heading-display mb-4 text-base">Nuevo pedido</h3>
 
-            {error && <p className="mb-3 rounded-lg p-3 text-sm error-banner">{error}</p>}
+            {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
             <label className="mb-3 block text-sm font-medium text-label">
               Cliente
               <select
                 value={clienteId}
                 onChange={(e) => setClienteId(e.target.value)}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               >
                 <option value="">Elegí un cliente</option>
                 {clientes.map((c) => (
@@ -142,7 +139,7 @@ export function PedidosPage() {
                     <select
                       value={it.productoId}
                       onChange={(e) => updateItem(idx, { productoId: e.target.value })}
-                      className="flex-1 rounded-lg border px-2 py-2 text-sm field-input"
+                      className="flex-1 rounded-md px-2 py-2 text-sm field-input"
                     >
                       <option value="">Producto</option>
                       {productos.map((p) => (
@@ -158,12 +155,12 @@ export function PedidosPage() {
                       placeholder={producto?.unidad ?? 'cant.'}
                       value={it.cantidad}
                       onChange={(e) => updateItem(idx, { cantidad: e.target.value })}
-                      className="w-24 rounded-lg border px-2 py-2 text-sm field-input"
+                      className="w-24 rounded-md px-2 py-2 text-sm field-input"
                     />
                     {items.length > 1 && (
                       <button
                         onClick={() => removeItem(idx)}
-                        className="rounded-full px-2.5 py-1.5 text-sm surface-muted text-secondary"
+                        className="rounded-md px-2.5 py-1.5 text-sm surface-muted text-secondary"
                       >
                         ✕
                       </button>
@@ -172,23 +169,20 @@ export function PedidosPage() {
                 )
               })}
             </div>
-            <button
-              onClick={addItem}
-              className="mt-2 text-sm font-medium text-violet-600 dark:text-violet-400"
-            >
+            <button onClick={addItem} className="mt-2 text-sm font-bold link-accent">
               + Agregar producto
             </button>
 
             <div className="mt-5 flex gap-2">
               <button
                 onClick={() => setShowForm(false)}
-                className="flex-1 rounded-lg py-2.5 text-sm font-semibold surface-muted text-label"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-label"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white dark:bg-violet-500"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary"
               >
                 Confirmar pedido
               </button>

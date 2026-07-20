@@ -18,7 +18,7 @@ export function ThemeToggle() {
       onClick={cycleTheme}
       aria-label={LABELS[theme]}
       title={LABELS[theme]}
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-lg dark:bg-slate-800"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
     >
       {ICONS[theme]}
     </button>

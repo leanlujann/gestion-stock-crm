@@ -36,8 +36,8 @@ export function NotificacionesPage() {
   return (
     <div className="mx-auto max-w-lg p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-heading">Notificaciones</h2>
-        <button onClick={marcarTodas} className="text-sm font-medium text-violet-600 dark:text-violet-400">
+        <h2 className="heading-display text-lg">Notificaciones</h2>
+        <button onClick={marcarTodas} className="text-sm font-bold link-accent">
           Marcar todas leídas
         </button>
       </div>
@@ -46,10 +46,10 @@ export function NotificacionesPage() {
         {notificaciones.map((n) => (
           <li
             key={n.id}
-            className={`flex gap-3 rounded-xl border p-4 shadow-sm ${
+            className={`flex gap-3 rounded-lg p-4 ${
               n.leida
                 ? 'surface'
-                : 'border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/40'
+                : 'border-2 border-amber-700 bg-amber-100 dark:border-amber-400 dark:bg-amber-950/40'
             }`}
           >
             <span className="text-lg">{ICONOS[n.tipo]}</span>

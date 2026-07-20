@@ -6,33 +6,59 @@
   color-scheme: light dark;
 }
 
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+h1, h2, h3, .heading-display {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
 @layer components {
-  .surface {
-    @apply border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900;
+  /* fondo general de la app */
+  .app-bg {
+    @apply bg-[#EDE6D6] text-[#17140F] dark:bg-[#17140F] dark:text-[#EDE6D6];
   }
+  /* tarjetas / paneles / modales */
+  .surface {
+    @apply border-2 border-[#17140F] bg-[#F6F2E9] dark:border-[#EDE6D6] dark:bg-[#221F1A];
+  }
+  /* chips, botones secundarios, barras de progreso vacías */
   .surface-muted {
-    @apply bg-slate-100 dark:bg-slate-800;
+    @apply bg-[#E2D9C4] dark:bg-[#332F27];
   }
   .surface-muted-hover {
-    @apply active:bg-slate-200 dark:active:bg-slate-700;
+    @apply active:bg-[#D6CBAF] dark:active:bg-[#403A2F];
   }
+  /* inputs de formulario */
   .field-input {
-    @apply border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
+    @apply border-2 border-[#17140F]/70 bg-[#F6F2E9] dark:border-[#EDE6D6]/60 dark:bg-[#221F1A] dark:text-[#EDE6D6];
+  }
+  /* titulos de seccion: bold, mayuscula, tracked */
+  .heading-display {
+    @apply font-bold uppercase tracking-wide text-[#17140F] dark:text-[#EDE6D6];
   }
   .text-heading {
-    @apply text-slate-700 dark:text-slate-200;
+    @apply text-[#17140F] dark:text-[#EDE6D6];
   }
   .text-label {
-    @apply text-slate-600 dark:text-slate-300;
+    @apply text-[#332F27] dark:text-[#D9D2C0];
   }
   .text-secondary {
-    @apply text-slate-500 dark:text-slate-400;
+    @apply text-[#5C5748] dark:text-[#ABA492];
   }
   .text-muted {
-    @apply text-slate-400 dark:text-slate-500;
+    @apply text-[#8A8471] dark:text-[#7A7464];
   }
   .error-banner {
-    @apply bg-red-50 text-red-600 dark:bg-red-950/60 dark:text-red-400;
+    @apply border-2 border-red-800 bg-red-100 text-red-900 dark:border-red-400 dark:bg-red-950/60 dark:text-red-300;
+  }
+  /* boton principal: negro sobre crema en claro, crema sobre negro en oscuro */
+  .btn-primary {
+    @apply bg-[#17140F] text-[#EDE6D6] active:bg-[#332F27] dark:bg-[#EDE6D6] dark:text-[#17140F] dark:active:bg-[#D9D2C0];
+  }
+  .link-accent {
+    @apply text-[#17140F] underline decoration-2 underline-offset-2 dark:text-[#EDE6D6];
   }
 }
 

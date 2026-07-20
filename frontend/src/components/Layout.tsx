@@ -32,18 +32,18 @@ export function Layout() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950">
-        <h1 className="text-lg font-semibold">Gestión de Stock</h1>
+    <div className="flex min-h-screen flex-col app-bg">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-[#17140F] px-4 py-3 app-bg dark:border-[#EDE6D6]">
+        <h1 className="heading-display text-lg">Gestión de Stock</h1>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <NavLink
             to="/notificaciones"
-            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-lg dark:bg-slate-800"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
           >
             🔔
             {noLeidas > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
                 {noLeidas}
               </span>
             )}
@@ -56,7 +56,7 @@ export function Layout() {
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+        className="fixed inset-x-0 bottom-0 z-10 border-t-2 border-[#17140F] app-bg dark:border-[#EDE6D6]"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="mx-auto flex max-w-lg">
@@ -66,10 +66,8 @@ export function Layout() {
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium ${
-                  isActive
-                    ? 'text-violet-600 dark:text-violet-400'
-                    : 'text-slate-500 dark:text-slate-400'
+                `flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-semibold uppercase tracking-wide ${
+                  isActive ? 'text-heading' : 'text-muted'
                 }`
               }
             >

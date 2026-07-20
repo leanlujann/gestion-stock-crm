@@ -28,6 +28,7 @@ export function StockPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Producto | null>(null)
   const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
 
   const load = () => {
     setLoading(true)
@@ -87,33 +88,44 @@ export function StockPage() {
     }
   }
 
+  const filtrados = productos.filter((p) => p.nombre.toLowerCase().includes(query.toLowerCase()))
+
   if (loading) return <p className="p-4 text-center text-secondary">Cargando...</p>
 
   return (
     <div className="mx-auto max-w-lg p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-heading">Productos</h2>
-        <button
-          onClick={openNuevo}
-          className="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white active:bg-violet-700 dark:bg-violet-500 dark:active:bg-violet-600"
-        >
+        <h2 className="heading-display text-lg">Productos</h2>
+        <button onClick={openNuevo} className="rounded-md px-4 py-2 text-sm font-bold uppercase tracking-wide btn-primary">
           + Producto
         </button>
       </div>
 
-      {error && <p className="mb-3 rounded-lg p-3 text-sm error-banner">{error}</p>}
+      <div className="relative mb-4">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted">
+          🔍
+        </span>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar producto..."
+          className="w-full rounded-md py-2.5 pl-10 pr-3 text-base field-input"
+        />
+      </div>
+
+      {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
       <ul className="flex flex-col gap-3">
-        {productos.map((p) => {
+        {filtrados.map((p) => {
           const ratio = Math.min(p.stockActual / p.stockMinimo, 1)
           return (
-            <li key={p.id} className="rounded-xl border p-4 shadow-sm surface">
+            <li key={p.id} className="rounded-lg p-4 surface">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium">
+                  <p className="font-bold uppercase tracking-wide text-heading">
                     {p.nombre}
                     {p.fechaVencimiento && (
-                      <span className={`ml-2 text-xs font-normal ${fmtVencimiento(p.fechaVencimiento).color}`}>
+                      <span className={`ml-2 text-xs font-normal normal-case ${fmtVencimiento(p.fechaVencimiento).color}`}>
                         venc. {fmtVencimiento(p.fechaVencimiento).texto}
                       </span>
                     )}
@@ -126,7 +138,7 @@ export function StockPage() {
                 </div>
                 <button
                   onClick={() => openEditar(p)}
-                  className="rounded-full px-3 py-1 text-xs font-medium surface-muted text-label"
+                  className="rounded-md px-3 py-1 text-xs font-bold uppercase tracking-wide surface-muted text-label"
                 >
                   Editar
                 </button>
@@ -142,13 +154,13 @@ export function StockPage() {
               <div className="mt-3 flex gap-2">
                 <button
                   onClick={() => handleAjuste(p, -1)}
-                  className="flex-1 rounded-lg py-1.5 text-sm font-medium surface-muted surface-muted-hover text-label"
+                  className="flex-1 rounded-md py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
                 >
                   -1 {p.unidad}
                 </button>
                 <button
                   onClick={() => handleAjuste(p, 1)}
-                  className="flex-1 rounded-lg py-1.5 text-sm font-medium surface-muted surface-muted-hover text-label"
+                  className="flex-1 rounded-md py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
                 >
                   +1 {p.unidad}
                 </button>
@@ -156,6 +168,9 @@ export function StockPage() {
             </li>
           )
         })}
+        {filtrados.length === 0 && productos.length > 0 && (
+          <p className="py-8 text-center text-sm text-muted">Sin resultados para "{query}".</p>
+        )}
         {productos.length === 0 && (
           <p className="py-8 text-center text-sm text-muted">Todavía no hay productos cargados.</p>
         )}
@@ -163,8 +178,8 @@ export function StockPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
-          <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-t-2xl p-5 sm:rounded-2xl surface">
-            <h3 className="mb-4 text-base font-semibold">
+          <form onSubmit={handleSubmit} className="w-full max-w-lg rounded-t-2xl p-5 sm:rounded-lg surface">
+            <h3 className="heading-display mb-4 text-base">
               {editing ? 'Editar producto' : 'Nuevo producto'}
             </h3>
 
@@ -174,7 +189,7 @@ export function StockPage() {
                 name="nombre"
                 required
                 defaultValue={editing?.nombre}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
 
@@ -183,7 +198,7 @@ export function StockPage() {
               <select
                 name="unidad"
                 defaultValue={editing?.unidad ?? 'KG'}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               >
                 <option value="KG">Kilogramos (KG)</option>
                 <option value="LT">Litros (LT)</option>
@@ -200,7 +215,7 @@ export function StockPage() {
                   step="0.01"
                   min="0"
                   defaultValue={0}
-                  className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                  className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
                 />
               </label>
             )}
@@ -213,7 +228,7 @@ export function StockPage() {
                 step="0.01"
                 min="0"
                 defaultValue={editing?.stockMinimo ?? 50}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
 
@@ -223,7 +238,7 @@ export function StockPage() {
                 name="fechaVencimiento"
                 type="date"
                 defaultValue={editing?.fechaVencimiento?.slice(0, 10) ?? ''}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
 
@@ -233,7 +248,7 @@ export function StockPage() {
                 name="notas"
                 defaultValue={editing?.notas ?? ''}
                 placeholder="ej. tambor completo, 1/4 restante..."
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
 
@@ -242,7 +257,7 @@ export function StockPage() {
               <select
                 name="proveedorId"
                 defaultValue={editing?.proveedorId ?? ''}
-                className="mt-1 w-full rounded-lg border px-3 py-2 text-base field-input"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               >
                 <option value="">Sin proveedor</option>
                 {proveedores.map((pr) => (
@@ -257,13 +272,13 @@ export function StockPage() {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="flex-1 rounded-lg py-2.5 text-sm font-semibold surface-muted text-label"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-label"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="flex-1 rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white dark:bg-violet-500"
+                className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary"
               >
                 Guardar
               </button>

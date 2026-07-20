@@ -25,17 +25,17 @@ export function ClienteDetailPage() {
 
   return (
     <div className="mx-auto max-w-lg p-4">
-      <Link to="/clientes" className="mb-3 inline-block text-sm text-violet-600 dark:text-violet-400">
+      <Link to="/clientes" className="mb-3 inline-block text-sm font-bold link-accent">
         ← Clientes
       </Link>
-      <h2 className="text-xl font-semibold">{cliente.nombre}</h2>
+      <h2 className="heading-display text-xl">{cliente.nombre}</h2>
       {cliente.telefono && <p className="text-sm text-secondary">{cliente.telefono}</p>}
 
-      <h3 className="mb-2 mt-6 text-sm font-semibold text-secondary">Historial de pedidos</h3>
-      <ol className="relative flex flex-col gap-4 border-l pl-4 border-slate-200 dark:border-slate-800">
+      <h3 className="heading-display mb-2 mt-6 text-sm">Historial de pedidos</h3>
+      <ol className="relative flex flex-col gap-4 border-l-2 pl-4 border-[#17140F] dark:border-[#EDE6D6]">
         {cliente.pedidos?.map((p) => (
           <li key={p.id} className="relative">
-            <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-violet-500" />
+            <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-[#17140F] dark:bg-[#EDE6D6]" />
             <p className="text-xs text-muted">{fmtFecha(p.fecha)}</p>
             <ul className="mt-1 text-sm text-heading">
               {p.items.map((it) => (
