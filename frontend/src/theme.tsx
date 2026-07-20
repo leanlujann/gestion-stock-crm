@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-export type Theme = 'light' | 'warm' | 'dark'
+export type Theme = 'light' | 'dark'
 
-const ORDER: Theme[] = ['light', 'warm', 'dark']
+const ORDER: Theme[] = ['light', 'dark']
 const STORAGE_KEY = 'theme'
 
 interface ThemeContextValue {
@@ -14,7 +14,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'warm' || stored === 'dark') return stored
+  if (stored === 'light' || stored === 'dark') return stored
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 

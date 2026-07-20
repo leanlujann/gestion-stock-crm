@@ -49,7 +49,7 @@ export function NotificacionesPage() {
             className={`flex gap-3 rounded-xl border p-4 shadow-sm ${
               n.leida
                 ? 'surface'
-                : 'border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/40 warm:border-violet-300'
+                : 'border-violet-200 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/40'
             }`}
           >
             <span className="text-lg">{ICONOS[n.tipo]}</span>

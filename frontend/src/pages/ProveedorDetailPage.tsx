@@ -88,7 +88,7 @@ export function ProveedorDetailPage() {
       </div>
 
       <h3 className="mb-2 mt-6 text-sm font-semibold text-secondary">Historial de compras</h3>
-      <ol className="relative flex flex-col gap-4 border-l pl-4 border-slate-200 warm:border-amber-200 dark:border-slate-800">
+      <ol className="relative flex flex-col gap-4 border-l pl-4 border-slate-200 dark:border-slate-800">
         {proveedor.compras?.map((c) => (
           <li key={c.id} className="relative">
             <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-emerald-500" />
