@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Unidad {
+  KG
+  LT
+  UN
+}
+
+enum EstadoPedido {
+  PENDIENTE_CONFIRMACION
+  CONFIRMADO
+  ENTREGADO
+  RECHAZADO
+}
+
+enum OrigenPedido {
+  MANUAL
+  WHATSAPP
+}
+
+enum TipoMovimiento {
+  VENTA
+  COMPRA
+  AJUSTE
+}
+
+enum TipoNotificacion {
+  STOCK_BAJO
+  PEDIDO_NUEVO
+  COMPRA_REGISTRADA
+}
+
+model Producto {
+  id           String   @id @default(cuid())
+  nombre       String
+  unidad       Unidad
+  stockActual  Float    @default(0)
+  stockMinimo  Float    @default(50)
+  fechaVencimiento DateTime?
+  notas        String?
+  proveedorId  String?
+  proveedor    Proveedor? @relation(fields: [proveedorId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pedidoItems  PedidoItem[]
+  compraItems  CompraItem[]
+  movimientos  MovimientoStock[]
+  notificaciones Notificacion[]
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  nombre    String
+  telefono  String?
+  notas     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pedidos   Pedido[]
+}
+
+model Proveedor {
+  id        String   @id @default(cuid())
+  nombre    String
+  telefono  String?
+  notas     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productos Producto[]
+  compras   Compra[]
+}
+
+model Pedido {
+  id        String       @id @default(cuid())
+  clienteId String
+  cliente   Cliente      @relation(fields: [clienteId], references: [id])
+  fecha     DateTime     @default(now())
+  estado    EstadoPedido @default(CONFIRMADO)
+  origen    OrigenPedido @default(MANUAL)
+  items     PedidoItem[]
+  movimientos MovimientoStock[]
+  createdAt DateTime     @default(now())
+}
+
+model PedidoItem {
+  id         String   @id @default(cuid())
+  pedidoId   String
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id])
+  cantidad   Float
+  unidad     Unidad
+}
+
+model Compra {
+  id          String       @id @default(cuid())
+  proveedorId String
+  proveedor   Proveedor    @relation(fields: [proveedorId], references: [id])
+  fecha       DateTime     @default(now())
+  estado      EstadoPedido @default(CONFIRMADO)
+  origen      OrigenPedido @default(MANUAL)
+  items       CompraItem[]
+  movimientos MovimientoStock[]
+  createdAt   DateTime     @default(now())
+}
+
+model CompraItem {
+  id         String   @id @default(cuid())
+  compraId   String
+  compra     Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id])
+  cantidad   Float
+  unidad     Unidad
+}
+
+model MovimientoStock {
+  id         String         @id @default(cuid())
+  productoId String
+  producto   Producto       @relation(fields: [productoId], references: [id])
+  tipo       TipoMovimiento
+  cantidad   Float
+  pedidoId   String?
+  pedido     Pedido?        @relation(fields: [pedidoId], references: [id])
+  compraId   String?
+  compra     Compra?        @relation(fields: [compraId], references: [id])
+  fecha      DateTime       @default(now())
+}
+
+model Notificacion {
+  id         String           @id @default(cuid())
+  tipo       TipoNotificacion
+  productoId String?
+  producto   Producto?        @relation(fields: [productoId], references: [id])
+  mensaje    String
+  leida      Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+}

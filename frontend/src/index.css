@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant warm (&:where([data-theme="warm"], [data-theme="warm"] *));
+
+:root {
+  color-scheme: light dark;
+}
+
+@layer components {
+  .surface {
+    @apply border-slate-200 bg-white warm:border-amber-200 warm:bg-white dark:border-slate-800 dark:bg-slate-900;
+  }
+  .surface-muted {
+    @apply bg-slate-100 warm:bg-amber-100 dark:bg-slate-800;
+  }
+  .surface-muted-hover {
+    @apply active:bg-slate-200 warm:active:bg-amber-200 dark:active:bg-slate-700;
+  }
+  .field-input {
+    @apply border-slate-300 warm:border-amber-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
+  }
+  .text-heading {
+    @apply text-slate-700 warm:text-stone-700 dark:text-slate-200;
+  }
+  .text-label {
+    @apply text-slate-600 warm:text-stone-600 dark:text-slate-300;
+  }
+  .text-secondary {
+    @apply text-slate-500 warm:text-stone-500 dark:text-slate-400;
+  }
+  .text-muted {
+    @apply text-slate-400 warm:text-stone-400 dark:text-slate-500;
+  }
+  .error-banner {
+    @apply bg-red-50 text-red-600 dark:bg-red-950/60 dark:text-red-400;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}

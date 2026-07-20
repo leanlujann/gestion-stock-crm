@@ -1,0 +1,20 @@
+node_modules/
+
+# datos reales del negocio: nunca subir la base de datos
+backend/dev.db
+backend/dev.db-journal
+backend/*.db
+backend/*.db-journal
+
+# builds
+backend/dist/
+backend/generated/
+frontend/dist/
+
+# entornos
+.env
+.env.local
+
+# logs
+*.log
+npm-debug.log*

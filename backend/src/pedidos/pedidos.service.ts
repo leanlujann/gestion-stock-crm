@@ -1,0 +1,99 @@
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreatePedidoDto } from './dto/create-pedido.dto';
+
+@Injectable()
+export class PedidosService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  findAll() {
+    return this.prisma.pedido.findMany({
+      orderBy: { fecha: 'desc' },
+      include: { cliente: true, items: { include: { producto: true } } },
+    });
+  }
+
+  async findOne(id: string) {
+    const pedido = await this.prisma.pedido.findUnique({
+      where: { id },
+      include: { cliente: true, items: { include: { producto: true } } },
+    });
+    if (!pedido) throw new NotFoundException('Pedido no encontrado');
+    return pedido;
+  }
+
+  async create(dto: CreatePedidoDto) {
+    const cliente = await this.prisma.cliente.findUnique({ where: { id: dto.clienteId } });
+    if (!cliente) throw new NotFoundException('Cliente no encontrado');
+
+    const productos = await this.prisma.producto.findMany({
+      where: { id: { in: dto.items.map((i) => i.productoId) } },
+    });
+
+    const productosPorId = new Map(productos.map((p) => [p.id, p]));
+
+    for (const item of dto.items) {
+      const producto = productosPorId.get(item.productoId);
+      if (!producto) {
+        throw new NotFoundException(`Producto ${item.productoId} no encontrado`);
+      }
+      if (item.cantidad > producto.stockActual) {
+        throw new BadRequestException(
+          `Stock insuficiente de ${producto.nombre}: pedido ${item.cantidad} ${producto.unidad}, disponible ${producto.stockActual} ${producto.unidad}`,
+        );
+      }
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const pedido = await tx.pedido.create({
+        data: {
+          clienteId: dto.clienteId,
+          items: {
+            create: dto.items.map((item) => ({
+              productoId: item.productoId,
+              cantidad: item.cantidad,
+              unidad: productosPorId.get(item.productoId)!.unidad,
+            })),
+          },
+        },
+        include: { cliente: true, items: { include: { producto: true } } },
+      });
+
+      for (const item of dto.items) {
+        const producto = productosPorId.get(item.productoId)!;
+        const actualizado = await tx.producto.update({
+          where: { id: item.productoId },
+          data: { stockActual: { decrement: item.cantidad } },
+        });
+
+        await tx.movimientoStock.create({
+          data: {
+            productoId: item.productoId,
+            tipo: 'VENTA',
+            cantidad: -item.cantidad,
+            pedidoId: pedido.id,
+          },
+        });
+
+        if (actualizado.stockActual < actualizado.stockMinimo) {
+          await tx.notificacion.create({
+            data: {
+              tipo: 'STOCK_BAJO',
+              productoId: item.productoId,
+              mensaje: `Stock bajo: ${producto.nombre} quedó en ${actualizado.stockActual} ${actualizado.unidad} (mínimo ${actualizado.stockMinimo}).`,
+            },
+          });
+        }
+      }
+
+      await tx.notificacion.create({
+        data: {
+          tipo: 'PEDIDO_NUEVO',
+          mensaje: `Nuevo pedido de ${cliente.nombre} (${dto.items.length} producto${dto.items.length > 1 ? 's' : ''}).`,
+        },
+      });
+
+      return pedido;
+    });
+  }
+}
