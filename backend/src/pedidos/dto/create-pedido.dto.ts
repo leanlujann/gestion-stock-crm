@@ -1,7 +1,9 @@
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
+  IsDateString,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   MinLength,
@@ -27,4 +29,16 @@ export class CreatePedidoDto {
   @Type(() => PedidoItemDto)
   @ArrayMinSize(1)
   items!: PedidoItemDto[];
+
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @IsOptional()
+  @IsNumber()
+  monto?: number;
+
+  @IsOptional()
+  @IsDateString()
+  fechaEntrega?: string;
 }

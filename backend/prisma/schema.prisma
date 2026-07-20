@@ -88,15 +88,19 @@ model Proveedor {
 }
 
 model Pedido {
-  id        String       @id @default(cuid())
-  clienteId String
-  cliente   Cliente      @relation(fields: [clienteId], references: [id])
-  fecha     DateTime     @default(now())
-  estado    EstadoPedido @default(CONFIRMADO)
-  origen    OrigenPedido @default(MANUAL)
-  items     PedidoItem[]
-  movimientos MovimientoStock[]
-  createdAt DateTime     @default(now())
+  id            String       @id @default(cuid())
+  clienteId     String
+  cliente       Cliente      @relation(fields: [clienteId], references: [id])
+  fecha         DateTime     @default(now())
+  estado        EstadoPedido @default(CONFIRMADO)
+  origen        OrigenPedido @default(MANUAL)
+  direccion     String?
+  monto         Float?
+  fechaEntrega  DateTime?
+  googleEventId String?
+  items         PedidoItem[]
+  movimientos   MovimientoStock[]
+  createdAt     DateTime     @default(now())
 }
 
 model PedidoItem {

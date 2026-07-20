@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CalendarService } from '../calendar/calendar.service';
 import { CreatePedidoDto } from './dto/create-pedido.dto';
 
 @Injectable()
 export class PedidosService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly calendar: CalendarService,
+  ) {}
 
   findAll() {
     return this.prisma.pedido.findMany({
@@ -44,10 +48,13 @@ export class PedidosService {
       }
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const pedido = await this.prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
         data: {
           clienteId: dto.clienteId,
+          direccion: dto.direccion,
+          monto: dto.monto,
+          fechaEntrega: dto.fechaEntrega ? new Date(dto.fechaEntrega) : undefined,
           items: {
             create: dto.items.map((item) => ({
               productoId: item.productoId,
@@ -94,6 +101,65 @@ export class PedidosService {
       });
 
       return pedido;
+    });
+
+    if (pedido.fechaEntrega) {
+      const eventId = await this.crearEventoCalendar(pedido);
+      if (eventId) {
+        await this.prisma.pedido.update({ where: { id: pedido.id }, data: { googleEventId: eventId } });
+        pedido.googleEventId = eventId;
+      }
+    }
+
+    return pedido;
+  }
+
+  async updateEstado(id: string, estado: 'CONFIRMADO' | 'ENTREGADO') {
+    const pedido = await this.findOne(id);
+
+    if (estado === 'ENTREGADO' && pedido.googleEventId) {
+      await this.calendar.eliminarEvento(pedido.googleEventId);
+    }
+
+    let googleEventId = pedido.googleEventId;
+    if (estado === 'CONFIRMADO' && pedido.estado === 'ENTREGADO' && pedido.fechaEntrega) {
+      googleEventId = await this.crearEventoCalendar(pedido);
+    }
+
+    return this.prisma.pedido.update({
+      where: { id },
+      data: { estado, googleEventId: estado === 'ENTREGADO' ? null : googleEventId },
+      include: { cliente: true, items: { include: { producto: true } } },
+    });
+  }
+
+  private async crearEventoCalendar(pedido: {
+    id: string;
+    cliente: { nombre: string; telefono: string | null };
+    items: { cantidad: number; unidad: string; producto: { nombre: string } }[];
+    direccion: string | null;
+    monto: number | null;
+    fechaEntrega: Date | null;
+  }) {
+    if (!pedido.fechaEntrega) return null;
+    const listaProductos = pedido.items
+      .map((it) => `- ${it.cantidad} ${it.unidad} ${it.producto.nombre}`)
+      .join('\n');
+    const descripcion = [
+      `Cliente: ${pedido.cliente.nombre}${pedido.cliente.telefono ? ' (' + pedido.cliente.telefono + ')' : ''}`,
+      pedido.direccion ? `Dirección: ${pedido.direccion}` : null,
+      pedido.monto ? `Monto: $${pedido.monto}` : null,
+      '',
+      'Productos:',
+      listaProductos,
+    ]
+      .filter((line) => line !== null)
+      .join('\n');
+
+    return this.calendar.crearEvento({
+      titulo: `Entregar pedido — ${pedido.cliente.nombre}`,
+      descripcion,
+      fechaEntrega: pedido.fechaEntrega,
     });
   }
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { CalendarModule } from './calendar/calendar.module';
 import { ProductosModule } from './productos/productos.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { ProveedoresModule } from './proveedores/proveedores.module';
@@ -12,6 +13,7 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module';
 @Module({
   imports: [
     PrismaModule,
+    CalendarModule,
     ProductosModule,
     ClientesModule,
     ProveedoresModule,

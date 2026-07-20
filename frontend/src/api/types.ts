@@ -70,6 +70,10 @@ export interface Pedido {
   fecha: string
   estado: 'PENDIENTE_CONFIRMACION' | 'CONFIRMADO' | 'ENTREGADO' | 'RECHAZADO'
   origen: 'MANUAL' | 'WHATSAPP'
+  direccion: string | null
+  monto: number | null
+  fechaEntrega: string | null
+  googleEventId: string | null
   items: PedidoItem[]
 }
 

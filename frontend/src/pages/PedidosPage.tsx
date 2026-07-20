@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { api } from '../api/client'
 import type { Cliente, Pedido, Producto } from '../api/types'
 
@@ -9,6 +9,21 @@ interface ItemForm {
 
 function fmtFecha(iso: string) {
   return new Date(iso).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+}
+
+function fmtFechaEntrega(iso: string) {
+  const fecha = new Date(iso)
+  const dd = String(fecha.getUTCDate()).padStart(2, '0')
+  const mm = String(fecha.getUTCMonth() + 1).padStart(2, '0')
+  const yy = String(fecha.getUTCFullYear()).slice(-2)
+  return `${dd}/${mm}/${yy}`
+}
+
+const ESTADO_LABEL: Record<string, string> = {
+  CONFIRMADO: 'Para Entregar',
+  ENTREGADO: 'Entregado',
+  PENDIENTE_CONFIRMACION: 'Pendiente',
+  RECHAZADO: 'Rechazado',
 }
 
 export function PedidosPage() {
@@ -53,7 +68,8 @@ export function PedidosPage() {
   const addItem = () => setItems((prev) => [...prev, { productoId: '', cantidad: '' }])
   const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx))
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setError('')
     if (!clienteId) {
       setError('Elegí un cliente')
@@ -66,12 +82,29 @@ export function PedidosPage() {
       setError('Agregá al menos un producto')
       return
     }
+    const form = new FormData(e.currentTarget)
     try {
-      await api.post('/pedidos', { clienteId, items: validItems })
+      await api.post('/pedidos', {
+        clienteId,
+        items: validItems,
+        direccion: String(form.get('direccion')) || undefined,
+        monto: form.get('monto') ? Number(form.get('monto')) : undefined,
+        fechaEntrega: String(form.get('fechaEntrega')) || undefined,
+      })
       setShowForm(false)
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear el pedido')
+    }
+  }
+
+  const toggleEstado = async (pedido: Pedido) => {
+    const nuevoEstado = pedido.estado === 'ENTREGADO' ? 'CONFIRMADO' : 'ENTREGADO'
+    try {
+      await api.patch(`/pedidos/${pedido.id}/estado`, { estado: nuevoEstado })
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar el estado')
     }
   }
 
@@ -85,6 +118,8 @@ export function PedidosPage() {
           + Pedido
         </button>
       </div>
+
+      {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
       <ul className="flex flex-col gap-3">
         {pedidos.map((pe) => (
@@ -100,6 +135,19 @@ export function PedidosPage() {
                 </li>
               ))}
             </ul>
+            {pe.direccion && <p className="mt-1 text-xs text-muted">📍 {pe.direccion}</p>}
+            <div className="mt-1 flex items-center gap-3 text-xs text-muted">
+              {pe.monto != null && <span>💵 ${pe.monto}</span>}
+              {pe.fechaEntrega && <span>🚚 entrega {fmtFechaEntrega(pe.fechaEntrega)}</span>}
+            </div>
+            <button
+              onClick={() => toggleEstado(pe)}
+              className={`mt-3 rounded-md px-3 py-1.5 text-xs font-bold uppercase tracking-wide ${
+                pe.estado === 'ENTREGADO' ? 'surface-muted text-label' : 'btn-primary'
+              }`}
+            >
+              {ESTADO_LABEL[pe.estado] ?? pe.estado}
+            </button>
           </li>
         ))}
         {pedidos.length === 0 && (
@@ -109,10 +157,11 @@ export function PedidosPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-lg surface">
+          <form
+            onSubmit={handleSubmit}
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl p-5 sm:rounded-lg surface"
+          >
             <h3 className="heading-display mb-4 text-base">Nuevo pedido</h3>
-
-            {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
             <label className="mb-3 block text-sm font-medium text-label">
               Cliente
@@ -159,6 +208,7 @@ export function PedidosPage() {
                     />
                     {items.length > 1 && (
                       <button
+                        type="button"
                         onClick={() => removeItem(idx)}
                         className="rounded-md px-2.5 py-1.5 text-sm surface-muted text-secondary"
                       >
@@ -169,25 +219,59 @@ export function PedidosPage() {
                 )
               })}
             </div>
-            <button onClick={addItem} className="mt-2 text-sm font-bold link-accent">
+            <button type="button" onClick={addItem} className="mt-2 text-sm font-bold link-accent">
               + Agregar producto
             </button>
 
-            <div className="mt-5 flex gap-2">
+            <label className="mb-3 mt-4 block text-sm font-medium text-label">
+              Dirección de entrega (opcional)
+              <input
+                name="direccion"
+                placeholder="Calle 123, localidad..."
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+            </label>
+
+            <label className="mb-3 block text-sm font-medium text-label">
+              Monto (opcional)
+              <input
+                name="monto"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="$"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+            </label>
+
+            <label className="mb-4 block text-sm font-medium text-label">
+              Fecha de entrega (opcional)
+              <input
+                name="fechaEntrega"
+                type="date"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                Si la ponés, se agenda en Google Calendar con aviso a las 8:00 AM.
+              </span>
+            </label>
+
+            <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => setShowForm(false)}
                 className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-label"
               >
                 Cancelar
               </button>
               <button
-                onClick={handleSubmit}
+                type="submit"
                 className="flex-1 rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary"
               >
                 Confirmar pedido
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
     </div>
