@@ -11,16 +11,24 @@ export interface Proveedor {
   compras?: Compra[]
 }
 
+export interface Lote {
+  id: string
+  productoId: string
+  cantidad: number
+  fechaVencimiento: string | null
+  notas: string | null
+  createdAt: string
+}
+
 export interface Producto {
   id: string
   nombre: string
   unidad: Unidad
   stockActual: number
   stockMinimo: number
-  fechaVencimiento: string | null
-  notas: string | null
   proveedorId: string | null
   proveedor?: Proveedor | null
+  lotes?: Lote[]
   createdAt: string
   updatedAt: string
   movimientos?: MovimientoStock[]

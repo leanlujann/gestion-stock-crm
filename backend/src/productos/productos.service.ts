@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { CreateLoteDto } from './dto/create-lote.dto';
 
 @Injectable()
 export class ProductosService {
@@ -9,7 +10,10 @@ export class ProductosService {
 
   findAll() {
     return this.prisma.producto.findMany({
-      include: { proveedor: true },
+      include: {
+        proveedor: true,
+        lotes: { orderBy: { fechaVencimiento: 'asc' } },
+      },
       orderBy: { nombre: 'asc' },
     });
   }
@@ -19,6 +23,7 @@ export class ProductosService {
       where: { id },
       include: {
         proveedor: true,
+        lotes: { orderBy: { fechaVencimiento: 'asc' } },
         movimientos: { orderBy: { fecha: 'desc' }, take: 20 },
       },
     });
@@ -27,33 +32,77 @@ export class ProductosService {
   }
 
   create(dto: CreateProductoDto) {
+    const stockActual = dto.stockActual ?? 0;
+    const crearLoteInicial = Boolean(dto.fechaVencimiento || dto.notas);
+
     return this.prisma.producto.create({
       data: {
         nombre: dto.nombre,
         unidad: dto.unidad,
-        stockActual: dto.stockActual ?? 0,
+        stockActual,
         stockMinimo: dto.stockMinimo ?? 50,
-        fechaVencimiento: dto.fechaVencimiento ? new Date(dto.fechaVencimiento) : undefined,
-        notas: dto.notas,
         proveedorId: dto.proveedorId,
+        lotes: crearLoteInicial
+          ? {
+              create: {
+                cantidad: stockActual,
+                fechaVencimiento: dto.fechaVencimiento ? new Date(dto.fechaVencimiento) : undefined,
+                notas: dto.notas,
+              },
+            }
+          : undefined,
       },
+      include: { lotes: true },
     });
   }
 
   async update(id: string, dto: UpdateProductoDto) {
     await this.findOne(id);
-    return this.prisma.producto.update({
-      where: { id },
-      data: {
-        ...dto,
-        fechaVencimiento: dto.fechaVencimiento ? new Date(dto.fechaVencimiento) : undefined,
-      },
-    });
+    return this.prisma.producto.update({ where: { id }, data: dto });
   }
 
   async remove(id: string) {
     await this.findOne(id);
     return this.prisma.producto.delete({ where: { id } });
+  }
+
+  async addLote(id: string, dto: CreateLoteDto) {
+    const producto = await this.findOne(id);
+
+    return this.prisma.$transaction(async (tx) => {
+      const lote = await tx.lote.create({
+        data: {
+          productoId: id,
+          cantidad: dto.cantidad,
+          fechaVencimiento: dto.fechaVencimiento ? new Date(dto.fechaVencimiento) : undefined,
+          notas: dto.notas,
+        },
+      });
+
+      await tx.producto.update({
+        where: { id },
+        data: { stockActual: { increment: dto.cantidad } },
+      });
+
+      await tx.movimientoStock.create({
+        data: { productoId: id, tipo: 'AJUSTE', cantidad: dto.cantidad },
+      });
+
+      return { ...lote, producto: producto.nombre };
+    });
+  }
+
+  async removeLote(id: string, loteId: string) {
+    const lote = await this.prisma.lote.findUnique({ where: { id: loteId } });
+    if (!lote || lote.productoId !== id) throw new NotFoundException('Lote no encontrado');
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.lote.delete({ where: { id: loteId } });
+      return tx.producto.update({
+        where: { id },
+        data: { stockActual: { decrement: lote.cantidad } },
+      });
+    });
   }
 
   async adjustStock(id: string, delta: number) {

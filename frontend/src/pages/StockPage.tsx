@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { api } from '../api/client'
-import type { Producto, Proveedor, Unidad } from '../api/types'
+import type { Lote, Producto, Proveedor, Unidad } from '../api/types'
 
 function estadoColor(producto: Producto) {
   const ratio = producto.stockActual / producto.stockMinimo
@@ -21,6 +21,14 @@ function fmtVencimiento(iso: string) {
   return { texto: `${dd}/${mm}/${yy}`, color }
 }
 
+function proximoVencimiento(lotes: Lote[]) {
+  const conFecha = lotes.filter((l) => l.fechaVencimiento)
+  if (conFecha.length === 0) return null
+  return conFecha.reduce((min, l) =>
+    l.fechaVencimiento! < min.fechaVencimiento! ? l : min,
+  )
+}
+
 export function StockPage() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [proveedores, setProveedores] = useState<Proveedor[]>([])
@@ -29,6 +37,8 @@ export function StockPage() {
   const [editing, setEditing] = useState<Producto | null>(null)
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
+  const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
+  const [agregandoLoteId, setAgregandoLoteId] = useState<string | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -53,24 +63,35 @@ export function StockPage() {
     setShowForm(true)
   }
 
+  const toggleExpandido = (id: string) => {
+    setExpandidos((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError('')
     const form = new FormData(e.currentTarget)
-    const payload = {
+    const base = {
       nombre: String(form.get('nombre')),
       unidad: String(form.get('unidad')) as Unidad,
       stockMinimo: Number(form.get('stockMinimo')),
       proveedorId: String(form.get('proveedorId')) || undefined,
-      fechaVencimiento: String(form.get('fechaVencimiento')) || undefined,
-      notas: String(form.get('notas')) || undefined,
-      ...(editing ? {} : { stockActual: Number(form.get('stockActual')) }),
     }
     try {
       if (editing) {
-        await api.patch(`/productos/${editing.id}`, payload)
+        await api.patch(`/productos/${editing.id}`, base)
       } else {
-        await api.post('/productos', payload)
+        await api.post('/productos', {
+          ...base,
+          stockActual: Number(form.get('stockActual')),
+          fechaVencimiento: String(form.get('fechaVencimiento')) || undefined,
+          notas: String(form.get('notas')) || undefined,
+        })
       }
       setShowForm(false)
       load()
@@ -85,6 +106,24 @@ export function StockPage() {
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al ajustar stock')
+    }
+  }
+
+  const handleAgregarLote = async (e: FormEvent<HTMLFormElement>, productoId: string) => {
+    e.preventDefault()
+    setError('')
+    const form = new FormData(e.currentTarget)
+    try {
+      await api.post(`/productos/${productoId}/lotes`, {
+        cantidad: Number(form.get('cantidad')),
+        fechaVencimiento: String(form.get('fechaVencimiento')) || undefined,
+        notas: String(form.get('notas')) || undefined,
+      })
+      setAgregandoLoteId(null)
+      setExpandidos((prev) => new Set(prev).add(productoId))
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al agregar el lote')
     }
   }
 
@@ -118,23 +157,18 @@ export function StockPage() {
       <ul className="flex flex-col gap-3">
         {filtrados.map((p) => {
           const ratio = Math.min(p.stockActual / p.stockMinimo, 1)
+          const lotes = p.lotes ?? []
+          const proximo = proximoVencimiento(lotes)
+          const expandido = expandidos.has(p.id)
           return (
             <li key={p.id} className="rounded-lg p-4 surface">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-bold uppercase tracking-wide text-heading">
-                    {p.nombre}
-                    {p.fechaVencimiento && (
-                      <span className={`ml-2 text-xs font-normal normal-case ${fmtVencimiento(p.fechaVencimiento).color}`}>
-                        venc. {fmtVencimiento(p.fechaVencimiento).texto}
-                      </span>
-                    )}
-                  </p>
+                  <p className="font-bold uppercase tracking-wide text-heading">{p.nombre}</p>
                   <p className="text-sm text-secondary">
                     {p.stockActual} {p.unidad} <span className="text-muted">· mínimo {p.stockMinimo}</span>
                   </p>
                   {p.proveedor && <p className="text-xs text-muted">Proveedor: {p.proveedor.nombre}</p>}
-                  {p.notas && <p className="text-xs text-muted">Nota: {p.notas}</p>}
                 </div>
                 <button
                   onClick={() => openEditar(p)}
@@ -165,6 +199,84 @@ export function StockPage() {
                   +1 {p.unidad}
                 </button>
               </div>
+
+              <div className="mt-3 flex items-center justify-between border-t pt-2 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
+                <button
+                  onClick={() => toggleExpandido(p.id)}
+                  className="text-xs font-bold uppercase tracking-wide link-accent"
+                >
+                  {expandido ? '▾' : '▸'} Vencimientos {lotes.length > 0 ? `(${lotes.length})` : ''}
+                  {!expandido && proximo && (
+                    <span className={`ml-2 font-normal normal-case ${fmtVencimiento(proximo.fechaVencimiento!).color}`}>
+                      próx. {fmtVencimiento(proximo.fechaVencimiento!).texto}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setAgregandoLoteId(agregandoLoteId === p.id ? null : p.id)}
+                  className="text-xs font-bold uppercase tracking-wide link-accent"
+                >
+                  + Lote
+                </button>
+              </div>
+
+              {expandido && (
+                <ul className="mt-2 flex flex-col gap-1">
+                  {lotes.length === 0 && <li className="text-xs text-muted">Sin lotes registrados.</li>}
+                  {lotes.map((l) => (
+                    <li key={l.id} className="flex items-baseline justify-between text-xs">
+                      <span className="text-secondary">
+                        {l.cantidad} {p.unidad}
+                        {l.notas && <span className="text-muted"> · {l.notas}</span>}
+                      </span>
+                      <span className={l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).color : 'text-muted'}>
+                        {l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).texto : 'sin fecha'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {agregandoLoteId === p.id && (
+                <form
+                  onSubmit={(e) => handleAgregarLote(e, p.id)}
+                  className="mt-2 flex flex-col gap-2 rounded-md p-2 surface-muted"
+                >
+                  <div className="flex gap-2">
+                    <input
+                      name="cantidad"
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      required
+                      placeholder={`cant. ${p.unidad}`}
+                      className="w-24 rounded-md px-2 py-1.5 text-sm field-input"
+                    />
+                    <input
+                      name="fechaVencimiento"
+                      type="date"
+                      className="flex-1 rounded-md px-2 py-1.5 text-sm field-input"
+                    />
+                  </div>
+                  <input
+                    name="notas"
+                    placeholder="Notas (opcional)"
+                    className="rounded-md px-2 py-1.5 text-sm field-input"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAgregandoLoteId(null)}
+                      className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide surface-muted-hover text-label"
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide btn-primary">
+                      Agregar
+                    </button>
+                  </div>
+                </form>
+              )}
             </li>
           )
         })}
@@ -207,17 +319,35 @@ export function StockPage() {
             </label>
 
             {!editing && (
-              <label className="mb-3 block text-sm font-medium text-label">
-                Stock inicial
-                <input
-                  name="stockActual"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue={0}
-                  className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
-                />
-              </label>
+              <>
+                <label className="mb-3 block text-sm font-medium text-label">
+                  Stock inicial
+                  <input
+                    name="stockActual"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={0}
+                    className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+                  />
+                </label>
+                <label className="mb-3 block text-sm font-medium text-label">
+                  Fecha de vencimiento (opcional)
+                  <input
+                    name="fechaVencimiento"
+                    type="date"
+                    className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+                  />
+                </label>
+                <label className="mb-3 block text-sm font-medium text-label">
+                  Notas del lote inicial (opcional)
+                  <input
+                    name="notas"
+                    placeholder="ej. tambor completo, 1/4 restante..."
+                    className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+                  />
+                </label>
+              </>
             )}
 
             <label className="mb-3 block text-sm font-medium text-label">
@@ -228,26 +358,6 @@ export function StockPage() {
                 step="0.01"
                 min="0"
                 defaultValue={editing?.stockMinimo ?? 50}
-                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
-              />
-            </label>
-
-            <label className="mb-3 block text-sm font-medium text-label">
-              Fecha de vencimiento (opcional)
-              <input
-                name="fechaVencimiento"
-                type="date"
-                defaultValue={editing?.fechaVencimiento?.slice(0, 10) ?? ''}
-                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
-              />
-            </label>
-
-            <label className="mb-3 block text-sm font-medium text-label">
-              Notas (opcional)
-              <input
-                name="notas"
-                defaultValue={editing?.notas ?? ''}
-                placeholder="ej. tambor completo, 1/4 restante..."
                 className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
@@ -267,6 +377,12 @@ export function StockPage() {
                 ))}
               </select>
             </label>
+
+            {editing && (
+              <p className="mb-4 text-xs text-muted">
+                Para agregar stock con su propia fecha de vencimiento, usá "+ Lote" en la tarjeta del producto.
+              </p>
+            )}
 
             <div className="flex gap-2">
               <button

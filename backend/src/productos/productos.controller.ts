@@ -11,6 +11,7 @@ import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
+import { CreateLoteDto } from './dto/create-lote.dto';
 
 @Controller('productos')
 export class ProductosController {
@@ -44,5 +45,15 @@ export class ProductosController {
   @Post(':id/ajustar-stock')
   adjustStock(@Param('id') id: string, @Body() dto: AdjustStockDto) {
     return this.productosService.adjustStock(id, dto.delta);
+  }
+
+  @Post(':id/lotes')
+  addLote(@Param('id') id: string, @Body() dto: CreateLoteDto) {
+    return this.productosService.addLote(id, dto);
+  }
+
+  @Delete(':id/lotes/:loteId')
+  removeLote(@Param('id') id: string, @Param('loteId') loteId: string) {
+    return this.productosService.removeLote(id, loteId);
   }
 }
