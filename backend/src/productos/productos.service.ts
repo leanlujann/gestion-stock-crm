@@ -41,6 +41,7 @@ export class ProductosService {
         unidad: dto.unidad,
         stockActual,
         stockMinimo: dto.stockMinimo ?? 50,
+        precio: dto.precio,
         proveedorId: dto.proveedorId,
         lotes: crearLoteInicial
           ? {

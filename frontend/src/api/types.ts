@@ -26,6 +26,7 @@ export interface Producto {
   unidad: Unidad
   stockActual: number
   stockMinimo: number
+  precio: number | null
   proveedorId: string | null
   proveedor?: Proveedor | null
   lotes?: Lote[]

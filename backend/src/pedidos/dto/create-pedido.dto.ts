@@ -35,10 +35,6 @@ export class CreatePedidoDto {
   direccion?: string;
 
   @IsOptional()
-  @IsNumber()
-  monto?: number;
-
-  @IsOptional()
   @IsDateString()
   fechaEntrega?: string;
 }

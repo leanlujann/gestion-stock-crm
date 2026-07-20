@@ -35,6 +35,7 @@ export function PedidosPage() {
   const [clienteId, setClienteId] = useState('')
   const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '' }])
   const [error, setError] = useState('')
+  const [tab, setTab] = useState<'activos' | 'historial'>('activos')
 
   const load = () => {
     setLoading(true)
@@ -88,7 +89,6 @@ export function PedidosPage() {
         clienteId,
         items: validItems,
         direccion: String(form.get('direccion')) || undefined,
-        monto: form.get('monto') ? Number(form.get('monto')) : undefined,
         fechaEntrega: String(form.get('fechaEntrega')) || undefined,
       })
       setShowForm(false)
@@ -108,6 +108,18 @@ export function PedidosPage() {
     }
   }
 
+  const totalEstimado = items.reduce((total, it) => {
+    const producto = productos.find((p) => p.id === it.productoId)
+    const cantidad = Number(it.cantidad) || 0
+    return total + cantidad * (producto?.precio ?? 0)
+  }, 0)
+
+  const pedidosFiltrados = pedidos.filter((pe) =>
+    tab === 'historial'
+      ? pe.estado === 'ENTREGADO' || pe.estado === 'RECHAZADO'
+      : pe.estado !== 'ENTREGADO' && pe.estado !== 'RECHAZADO',
+  )
+
   if (loading) return <p className="p-4 text-center text-secondary">Cargando...</p>
 
   return (
@@ -121,8 +133,27 @@ export function PedidosPage() {
 
       {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
+      <div className="mb-4 flex gap-2">
+        <button
+          onClick={() => setTab('activos')}
+          className={`flex-1 rounded-md py-2 text-xs font-bold uppercase tracking-wide ${
+            tab === 'activos' ? 'btn-primary' : 'surface-muted text-label'
+          }`}
+        >
+          Para entregar
+        </button>
+        <button
+          onClick={() => setTab('historial')}
+          className={`flex-1 rounded-md py-2 text-xs font-bold uppercase tracking-wide ${
+            tab === 'historial' ? 'btn-primary' : 'surface-muted text-label'
+          }`}
+        >
+          Historial
+        </button>
+      </div>
+
       <ul className="flex flex-col gap-3">
-        {pedidos.map((pe) => (
+        {pedidosFiltrados.map((pe) => (
           <li key={pe.id} className="rounded-lg p-4 surface">
             <div className="flex items-start justify-between">
               <p className="font-bold uppercase tracking-wide text-heading">{pe.cliente.nombre}</p>
@@ -150,8 +181,10 @@ export function PedidosPage() {
             </button>
           </li>
         ))}
-        {pedidos.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted">Todavía no hay pedidos.</p>
+        {pedidosFiltrados.length === 0 && (
+          <p className="py-8 text-center text-sm text-muted">
+            {tab === 'historial' ? 'Todavía no hay pedidos entregados.' : 'No hay pedidos para entregar.'}
+          </p>
         )}
       </ul>
 
@@ -232,17 +265,10 @@ export function PedidosPage() {
               />
             </label>
 
-            <label className="mb-3 block text-sm font-medium text-label">
-              Monto (opcional)
-              <input
-                name="monto"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="$"
-                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
-              />
-            </label>
+            <p className="mb-3 flex items-center justify-between rounded-md px-3 py-2 text-sm surface-muted">
+              <span className="font-medium text-label">Monto estimado</span>
+              <span className="font-bold text-heading">${totalEstimado.toFixed(2)}</span>
+            </p>
 
             <label className="mb-4 block text-sm font-medium text-label">
               Fecha de entrega (opcional)

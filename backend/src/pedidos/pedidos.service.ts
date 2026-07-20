@@ -48,12 +48,17 @@ export class PedidosService {
       }
     }
 
+    const monto = dto.items.reduce((total, item) => {
+      const producto = productosPorId.get(item.productoId)!;
+      return total + item.cantidad * (producto.precio ?? 0);
+    }, 0);
+
     const pedido = await this.prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
         data: {
           clienteId: dto.clienteId,
           direccion: dto.direccion,
-          monto: dto.monto,
+          monto,
           fechaEntrega: dto.fechaEntrega ? new Date(dto.fechaEntrega) : undefined,
           items: {
             create: dto.items.map((item) => ({

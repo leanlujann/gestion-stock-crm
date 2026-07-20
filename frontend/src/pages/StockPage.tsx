@@ -80,6 +80,7 @@ export function StockPage() {
       nombre: String(form.get('nombre')),
       unidad: String(form.get('unidad')) as Unidad,
       stockMinimo: Number(form.get('stockMinimo')),
+      precio: form.get('precio') ? Number(form.get('precio')) : undefined,
       proveedorId: String(form.get('proveedorId')) || undefined,
     }
     try {
@@ -175,6 +176,7 @@ export function StockPage() {
                   </p>
                   <p className="text-sm text-secondary">
                     {p.stockActual} {p.unidad} <span className="text-muted">· mínimo {p.stockMinimo}</span>
+                    {p.precio != null && <span className="text-muted"> · ${p.precio}/{p.unidad}</span>}
                   </p>
                   {p.proveedor && <p className="text-xs text-muted">Proveedor: {p.proveedor.nombre}</p>}
                 </div>
@@ -367,6 +369,22 @@ export function StockPage() {
                 defaultValue={editing?.stockMinimo ?? 50}
                 className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
+            </label>
+
+            <label className="mb-3 block text-sm font-medium text-label">
+              Precio unitario (opcional)
+              <input
+                name="precio"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={editing?.precio ?? ''}
+                placeholder="$"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                Se usa para calcular el monto de los pedidos automáticamente.
+              </span>
             </label>
 
             <label className="mb-4 block text-sm font-medium text-label">
