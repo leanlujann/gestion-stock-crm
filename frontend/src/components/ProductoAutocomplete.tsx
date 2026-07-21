@@ -34,7 +34,7 @@ export function ProductoAutocomplete({
         className="w-full rounded-md px-2 py-2 text-sm field-input"
       />
       {open && (
-        <ul className="absolute z-30 mt-1 max-h-48 w-full overflow-y-auto rounded-md surface shadow-lg border border-[#17140F]/15 dark:border-[#EDE6D6]/15">
+        <ul className="absolute z-30 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-[#17140F]/15 bg-[#F6F2E9] shadow-lg dark:border-[#EDE6D6]/15 dark:bg-[#16211c]">
           {filtrados.length === 0 && <li className="px-3 py-2 text-sm text-muted">Sin resultados</li>}
           {filtrados.map((p) => (
             <li key={p.id}>
