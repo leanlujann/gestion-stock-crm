@@ -56,7 +56,7 @@ export function Layout() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col app-bg">
+    <div className="flex h-dvh flex-col app-bg">
       <div className={`bg-scene bg-scene-${scene}`} aria-hidden="true" />
 
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-md bg-[#EDE6D6]/50 dark:bg-black/15">
@@ -77,7 +77,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-28">
+      <main className="min-h-0 flex-1 overflow-y-auto pb-28">
         <Outlet />
       </main>
 
