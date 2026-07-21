@@ -7,7 +7,7 @@ import { useTheme } from '../theme'
 const TABS = [
   { to: '/', label: 'Stock', icon: '📦', end: true },
   { to: '/pedidos', label: 'Pedidos', icon: '🧾' },
-  { to: '/clientes', label: 'CRM', icon: '👥' },
+  { to: '/clientes', label: 'Clientes', icon: '👥' },
   { to: '/proveedores', label: 'Proveedores', icon: '🚚' },
 ]
 
