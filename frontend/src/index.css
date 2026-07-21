@@ -15,24 +15,24 @@ h1, h2, h3, .heading-display {
 }
 
 @layer components {
-  /* fondo general de la app */
+  /* fondo general de la app: el color real lo pone .bg-scene-*, esto son solo los textos */
   .app-bg {
-    @apply bg-[#EDE6D6] text-[#17140F] dark:bg-[#17140F] dark:text-[#EDE6D6];
+    @apply text-[#17140F] dark:text-[#EDE6D6];
   }
-  /* tarjetas / paneles / modales */
+  /* tarjetas / paneles / modales: vidrio esmerilado sobre el fondo liquid glass */
   .surface {
-    @apply border-2 border-[#17140F] bg-[#F6F2E9] dark:border-[#EDE6D6] dark:bg-[#221F1A];
+    @apply border-2 border-[#17140F] bg-[#F6F2E9] dark:border dark:border-white/15 dark:bg-white/10 dark:backdrop-blur-xl dark:shadow-xl dark:shadow-black/30;
   }
   /* chips, botones secundarios, barras de progreso vacías */
   .surface-muted {
-    @apply bg-[#E2D9C4] dark:bg-[#332F27];
+    @apply bg-[#E2D9C4] dark:bg-white/10 dark:backdrop-blur-md;
   }
   .surface-muted-hover {
-    @apply active:bg-[#D6CBAF] dark:active:bg-[#403A2F];
+    @apply active:bg-[#D6CBAF] dark:active:bg-white/20;
   }
   /* inputs de formulario */
   .field-input {
-    @apply border-2 border-[#17140F]/70 bg-[#F6F2E9] dark:border-[#EDE6D6]/60 dark:bg-[#221F1A] dark:text-[#EDE6D6];
+    @apply border-2 border-[#17140F]/70 bg-[#F6F2E9] dark:border dark:border-white/20 dark:bg-white/10 dark:text-[#EDE6D6] dark:backdrop-blur-md dark:placeholder-white/40;
   }
   /* titulos de seccion: bold, mayuscula, tracked */
   .heading-display {
@@ -42,13 +42,13 @@ h1, h2, h3, .heading-display {
     @apply text-[#17140F] dark:text-[#EDE6D6];
   }
   .text-label {
-    @apply text-[#332F27] dark:text-[#D9D2C0];
+    @apply text-[#332F27] dark:text-white/90;
   }
   .text-secondary {
-    @apply text-[#5C5748] dark:text-[#ABA492];
+    @apply text-[#5C5748] dark:text-white/70;
   }
   .text-muted {
-    @apply text-[#8A8471] dark:text-[#7A7464];
+    @apply text-[#8A8471] dark:text-white/50;
   }
   .error-banner {
     @apply border-2 border-red-800 bg-red-100 text-red-900 dark:border-red-400 dark:bg-red-950/60 dark:text-red-300;
@@ -60,6 +60,104 @@ h1, h2, h3, .heading-display {
   .link-accent {
     @apply text-[#17140F] underline decoration-2 underline-offset-2 dark:text-[#EDE6D6];
   }
+}
+
+/* fondos "liquid glass": una escena distinta por pestaña, misma familia visual */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-repeat: no-repeat;
+  background-size: 180% 180%;
+  animation: liquid-drift 34s ease-in-out infinite alternate;
+  transition: background-color 0.6s ease;
+}
+
+@keyframes liquid-drift {
+  0% {
+    background-position: 10% 10%, 90% 0%, 100% 100%, 0% 90%;
+  }
+  100% {
+    background-position: 25% 25%, 75% 15%, 85% 85%, 15% 80%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-scene {
+    animation: none;
+  }
+}
+
+/* Stock: índigo / azul / cian */
+.bg-scene-stock {
+  background-color: #eef0fb;
+  background-image:
+    radial-gradient(45% 40% at 20% 25%, rgba(99, 102, 241, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(56, 189, 248, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 75% 85%, rgba(139, 92, 246, 0.18), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgba(29, 78, 216, 0.16), transparent 70%);
+}
+[data-theme='dark'] .bg-scene-stock {
+  background-color: #0b1030;
+  background-image:
+    radial-gradient(45% 40% at 20% 25%, rgba(99, 102, 241, 0.65), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(56, 189, 248, 0.5), transparent 70%),
+    radial-gradient(55% 50% at 75% 85%, rgba(139, 92, 246, 0.55), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgba(29, 78, 216, 0.45), transparent 70%);
+}
+
+/* Pedidos: violeta / fucsia / azul */
+.bg-scene-pedidos {
+  background-color: #f2eefb;
+  background-image:
+    radial-gradient(45% 40% at 25% 20%, rgba(124, 58, 237, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 85% 20%, rgba(217, 70, 239, 0.18), transparent 70%),
+    radial-gradient(55% 50% at 80% 85%, rgba(59, 130, 246, 0.18), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(168, 85, 247, 0.16), transparent 70%);
+}
+[data-theme='dark'] .bg-scene-pedidos {
+  background-color: #150b30;
+  background-image:
+    radial-gradient(45% 40% at 25% 20%, rgba(124, 58, 237, 0.65), transparent 70%),
+    radial-gradient(50% 45% at 85% 20%, rgba(217, 70, 239, 0.5), transparent 70%),
+    radial-gradient(55% 50% at 80% 85%, rgba(59, 130, 246, 0.5), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(168, 85, 247, 0.45), transparent 70%);
+}
+
+/* CRM: azul / turquesa / esmeralda */
+.bg-scene-crm {
+  background-color: #eaf6f4;
+  background-image:
+    radial-gradient(45% 40% at 20% 20%, rgba(20, 184, 166, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(14, 165, 233, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 78% 88%, rgba(16, 185, 129, 0.18), transparent 70%),
+    radial-gradient(40% 40% at 10% 88%, rgba(34, 211, 238, 0.16), transparent 70%);
+}
+[data-theme='dark'] .bg-scene-crm {
+  background-color: #061b26;
+  background-image:
+    radial-gradient(45% 40% at 20% 20%, rgba(20, 184, 166, 0.6), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(14, 165, 233, 0.55), transparent 70%),
+    radial-gradient(55% 50% at 78% 88%, rgba(16, 185, 129, 0.5), transparent 70%),
+    radial-gradient(40% 40% at 10% 88%, rgba(34, 211, 238, 0.4), transparent 70%);
+}
+
+/* Proveedores: índigo / rosa / ámbar */
+.bg-scene-proveedores {
+  background-color: #f8eef2;
+  background-image:
+    radial-gradient(45% 40% at 22% 22%, rgba(251, 113, 133, 0.2), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(99, 102, 241, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(245, 158, 11, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(167, 139, 250, 0.18), transparent 70%);
+}
+[data-theme='dark'] .bg-scene-proveedores {
+  background-color: #1a0f2e;
+  background-image:
+    radial-gradient(45% 40% at 22% 22%, rgba(251, 113, 133, 0.55), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(99, 102, 241, 0.55), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(245, 158, 11, 0.4), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(167, 139, 250, 0.45), transparent 70%);
 }
 
 html, body, #root {

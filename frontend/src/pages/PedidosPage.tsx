@@ -225,7 +225,7 @@ export function PedidosPage() {
             </ul>
             {pe.direccion && <p className="mt-1 text-xs text-muted">📍 {pe.direccion}</p>}
             <div className="mt-1 flex items-center gap-3 text-xs text-muted">
-              {pe.monto != null && <span>💵 ${pe.monto}</span>}
+              {pe.monto != null && <span>💵 ${pe.monto.toFixed(2)}</span>}
               {pe.fechaEntrega && <span>🚚 entrega {fmtFechaEntrega(pe.fechaEntrega)}</span>}
             </div>
             <button
