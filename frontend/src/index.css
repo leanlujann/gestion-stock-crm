@@ -88,40 +88,40 @@ h1, h2, h3, .heading-display {
   }
 }
 
-/* Stock: índigo / azul / cian */
+/* Stock: esmeralda / cian */
 .bg-scene-stock {
-  background-color: #eef0fb;
+  background-color: #eaf7f0;
   background-image:
-    radial-gradient(45% 40% at 20% 25%, rgba(99, 102, 241, 0.22), transparent 70%),
-    radial-gradient(50% 45% at 85% 15%, rgba(56, 189, 248, 0.2), transparent 70%),
-    radial-gradient(55% 50% at 75% 85%, rgba(139, 92, 246, 0.18), transparent 70%),
-    radial-gradient(40% 40% at 10% 90%, rgba(29, 78, 216, 0.16), transparent 70%);
+    radial-gradient(45% 40% at 20% 25%, rgba(16, 185, 129, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(34, 211, 238, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 75% 85%, rgba(5, 150, 105, 0.18), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgba(45, 212, 191, 0.16), transparent 70%);
 }
 [data-theme='dark'] .bg-scene-stock {
-  background-color: #0b1030;
+  background-color: #071f1a;
   background-image:
-    radial-gradient(45% 40% at 20% 25%, rgba(99, 102, 241, 0.65), transparent 70%),
-    radial-gradient(50% 45% at 85% 15%, rgba(56, 189, 248, 0.5), transparent 70%),
-    radial-gradient(55% 50% at 75% 85%, rgba(139, 92, 246, 0.55), transparent 70%),
-    radial-gradient(40% 40% at 10% 90%, rgba(29, 78, 216, 0.45), transparent 70%);
+    radial-gradient(45% 40% at 20% 25%, rgba(16, 185, 129, 0.65), transparent 70%),
+    radial-gradient(50% 45% at 85% 15%, rgba(34, 211, 238, 0.5), transparent 70%),
+    radial-gradient(55% 50% at 75% 85%, rgba(5, 150, 105, 0.55), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgba(45, 212, 191, 0.45), transparent 70%);
 }
 
-/* Pedidos: violeta / fucsia / azul */
+/* Pedidos: turquesa / azul verdoso */
 .bg-scene-pedidos {
-  background-color: #f2eefb;
+  background-color: #e9f6f6;
   background-image:
-    radial-gradient(45% 40% at 25% 20%, rgba(124, 58, 237, 0.22), transparent 70%),
-    radial-gradient(50% 45% at 85% 20%, rgba(217, 70, 239, 0.18), transparent 70%),
-    radial-gradient(55% 50% at 80% 85%, rgba(59, 130, 246, 0.18), transparent 70%),
-    radial-gradient(40% 40% at 10% 85%, rgba(168, 85, 247, 0.16), transparent 70%);
+    radial-gradient(45% 40% at 25% 20%, rgba(13, 148, 136, 0.22), transparent 70%),
+    radial-gradient(50% 45% at 85% 20%, rgba(6, 182, 212, 0.18), transparent 70%),
+    radial-gradient(55% 50% at 80% 85%, rgba(56, 189, 248, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(20, 184, 166, 0.18), transparent 70%);
 }
 [data-theme='dark'] .bg-scene-pedidos {
-  background-color: #150b30;
+  background-color: #051e24;
   background-image:
-    radial-gradient(45% 40% at 25% 20%, rgba(124, 58, 237, 0.65), transparent 70%),
-    radial-gradient(50% 45% at 85% 20%, rgba(217, 70, 239, 0.5), transparent 70%),
-    radial-gradient(55% 50% at 80% 85%, rgba(59, 130, 246, 0.5), transparent 70%),
-    radial-gradient(40% 40% at 10% 85%, rgba(168, 85, 247, 0.45), transparent 70%);
+    radial-gradient(45% 40% at 25% 20%, rgba(13, 148, 136, 0.65), transparent 70%),
+    radial-gradient(50% 45% at 85% 20%, rgba(6, 182, 212, 0.5), transparent 70%),
+    radial-gradient(55% 50% at 80% 85%, rgba(56, 189, 248, 0.45), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(20, 184, 166, 0.5), transparent 70%);
 }
 
 /* CRM: azul / turquesa / esmeralda */
@@ -142,22 +142,22 @@ h1, h2, h3, .heading-display {
     radial-gradient(40% 40% at 10% 88%, rgba(34, 211, 238, 0.4), transparent 70%);
 }
 
-/* Proveedores: índigo / rosa / ámbar */
+/* Proveedores: verde lima / oliva */
 .bg-scene-proveedores {
-  background-color: #f8eef2;
+  background-color: #f1f7e6;
   background-image:
-    radial-gradient(45% 40% at 22% 22%, rgba(251, 113, 133, 0.2), transparent 70%),
-    radial-gradient(50% 45% at 85% 18%, rgba(99, 102, 241, 0.2), transparent 70%),
-    radial-gradient(55% 50% at 78% 85%, rgba(245, 158, 11, 0.16), transparent 70%),
-    radial-gradient(40% 40% at 10% 85%, rgba(167, 139, 250, 0.18), transparent 70%);
+    radial-gradient(45% 40% at 22% 22%, rgba(132, 204, 22, 0.2), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(16, 185, 129, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(101, 163, 13, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(52, 211, 153, 0.18), transparent 70%);
 }
 [data-theme='dark'] .bg-scene-proveedores {
-  background-color: #1a0f2e;
+  background-color: #10200a;
   background-image:
-    radial-gradient(45% 40% at 22% 22%, rgba(251, 113, 133, 0.55), transparent 70%),
-    radial-gradient(50% 45% at 85% 18%, rgba(99, 102, 241, 0.55), transparent 70%),
-    radial-gradient(55% 50% at 78% 85%, rgba(245, 158, 11, 0.4), transparent 70%),
-    radial-gradient(40% 40% at 10% 85%, rgba(167, 139, 250, 0.45), transparent 70%);
+    radial-gradient(45% 40% at 22% 22%, rgba(132, 204, 22, 0.55), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(16, 185, 129, 0.55), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(101, 163, 13, 0.45), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(52, 211, 153, 0.45), transparent 70%);
 }
 
 html, body, #root {
