@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { ThemeToggle } from './ThemeToggle'
+import { useTheme } from '../theme'
 
 const TABS = [
   { to: '/', label: 'Stock', icon: '📦', end: true },
@@ -11,15 +12,30 @@ const TABS = [
 ]
 
 function getScene(pathname: string) {
-  if (pathname.startsWith('/pedidos')) return 'bg-scene-pedidos'
-  if (pathname.startsWith('/clientes')) return 'bg-scene-crm'
-  if (pathname.startsWith('/proveedores')) return 'bg-scene-proveedores'
-  return 'bg-scene-stock'
+  if (pathname.startsWith('/pedidos')) return 'pedidos'
+  if (pathname.startsWith('/clientes')) return 'crm'
+  if (pathname.startsWith('/proveedores')) return 'proveedores'
+  return 'stock'
+}
+
+// espejo de los colores base definidos en index.css (.bg-scene-*)
+const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
+  stock: { light: '#eaf7f0', dark: '#071f1a' },
+  pedidos: { light: '#e9f6f6', dark: '#051e24' },
+  crm: { light: '#eaf6f4', dark: '#061b26' },
+  proveedores: { light: '#f1f7e6', dark: '#10200a' },
 }
 
 export function Layout() {
   const [noLeidas, setNoLeidas] = useState(0)
   const location = useLocation()
+  const { theme } = useTheme()
+  const scene = getScene(location.pathname)
+
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', SCENE_COLORS[scene][theme])
+  }, [scene, theme])
 
   useEffect(() => {
     let cancelled = false
@@ -41,7 +57,7 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col app-bg">
-      <div className={`bg-scene ${getScene(location.pathname)}`} aria-hidden="true" />
+      <div className={`bg-scene bg-scene-${scene}`} aria-hidden="true" />
 
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-md bg-[#EDE6D6]/50 dark:bg-black/15">
         <h1 className="heading-display text-lg">Gestión de Stock</h1>
