@@ -76,13 +76,13 @@ export function Layout() {
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-0.5 rounded-full px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
+                `flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-full px-1 py-1.5 text-[10px] font-semibold uppercase tracking-wide transition-colors ${
                   isActive ? 'bg-[#17140F]/10 text-heading dark:bg-white/15' : 'text-muted'
                 }`
               }
             >
               <span className="text-xl leading-none">{tab.icon}</span>
-              {tab.label}
+              <span className="w-full truncate text-center">{tab.label}</span>
             </NavLink>
           ))}
         </div>
