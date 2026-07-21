@@ -164,6 +164,10 @@ html, body, #root {
   height: 100%;
 }
 
+html {
+  overscroll-behavior-y: none;
+}
+
 body {
   margin: 0;
   background-color: #eaf7f0;
@@ -174,3 +178,14 @@ body {
 [data-theme='dark'] body {
   background-color: #071f1a;
 }
+
+/* fallback pintado en html/body: evita que un rebote (rubber-band) o un
+   desfasaje de dvh en iOS Safari deje ver negro detrás de la escena fija */
+html[data-scene='stock'] { background-color: #eaf7f0; }
+html[data-scene='pedidos'] { background-color: #e9f6f6; }
+html[data-scene='crm'] { background-color: #eaf6f4; }
+html[data-scene='proveedores'] { background-color: #f1f7e6; }
+html[data-theme='dark'][data-scene='stock'] { background-color: #071f1a; }
+html[data-theme='dark'][data-scene='pedidos'] { background-color: #051e24; }
+html[data-theme='dark'][data-scene='crm'] { background-color: #061b26; }
+html[data-theme='dark'][data-scene='proveedores'] { background-color: #10200a; }

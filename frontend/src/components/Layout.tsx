@@ -35,6 +35,7 @@ export function Layout() {
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]')
     if (meta) meta.setAttribute('content', SCENE_COLORS[scene][theme])
+    document.documentElement.setAttribute('data-scene', scene)
   }, [scene, theme])
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto pb-28">
+      <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-28">
         <Outlet />
       </main>
 
