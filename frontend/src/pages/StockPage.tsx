@@ -102,6 +102,17 @@ export function StockPage() {
     }
   }
 
+  const handleEliminar = async (producto: Producto) => {
+    if (!window.confirm(`¿Borrar "${producto.nombre}" del stock? Esta acción no se puede deshacer.`)) return
+    setError('')
+    try {
+      await api.delete(`/productos/${producto.id}`)
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al borrar el producto')
+    }
+  }
+
   const handleAjuste = async (producto: Producto, signo: 1 | -1) => {
     const cantidad = Number(cantidades[producto.id])
     const delta = signo * (cantidad > 0 ? cantidad : 1)
@@ -184,12 +195,21 @@ export function StockPage() {
                   </p>
                   {p.proveedor && <p className="text-xs text-muted">Proveedor: {p.proveedor.nombre}</p>}
                 </div>
-                <button
-                  onClick={() => openEditar(p)}
-                  className="rounded-md px-3 py-1 text-xs font-bold uppercase tracking-wide surface-muted text-label"
-                >
-                  Editar
-                </button>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => openEditar(p)}
+                    className="rounded-md px-3 py-1 text-xs font-bold uppercase tracking-wide surface-muted text-label"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleEliminar(p)}
+                    aria-label={`Borrar ${p.nombre}`}
+                    className="rounded-md px-2.5 py-1 text-xs font-bold surface-muted text-red-600 dark:text-red-400"
+                  >
+                    🗑
+                  </button>
+                </div>
               </div>
 
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full surface-muted">
