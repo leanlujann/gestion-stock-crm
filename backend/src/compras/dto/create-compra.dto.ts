@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   MinLength,
@@ -27,4 +28,8 @@ export class CreateCompraDto {
   @Type(() => CompraItemDto)
   @ArrayMinSize(1)
   items!: CompraItemDto[];
+
+  @IsOptional()
+  @IsNumber()
+  monto?: number;
 }

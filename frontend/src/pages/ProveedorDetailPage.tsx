@@ -2,10 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Producto, Proveedor } from '../api/types'
+import { ProductoAutocomplete } from '../components/ProductoAutocomplete'
 
 interface ItemForm {
   productoId: string
   cantidad: string
+}
+
+function fmtMonto(monto: number) {
+  return monto.toFixed(2)
 }
 
 function fmtFecha(iso: string) {
@@ -18,6 +23,7 @@ export function ProveedorDetailPage() {
   const [productos, setProductos] = useState<Producto[]>([])
   const [showForm, setShowForm] = useState(false)
   const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '' }])
+  const [monto, setMonto] = useState('')
   const [error, setError] = useState('')
 
   const load = () => {
@@ -37,6 +43,7 @@ export function ProveedorDetailPage() {
 
   const openNuevaCompra = () => {
     setItems([{ productoId: '', cantidad: '' }])
+    setMonto('')
     setError('')
     setShowForm(true)
   }
@@ -58,7 +65,11 @@ export function ProveedorDetailPage() {
       return
     }
     try {
-      await api.post('/compras', { proveedorId: id, items: validItems })
+      await api.post('/compras', {
+        proveedorId: id,
+        items: validItems,
+        monto: monto ? Number(monto) : undefined,
+      })
       setShowForm(false)
       load()
     } catch (err) {
@@ -100,6 +111,7 @@ export function ProveedorDetailPage() {
                 </li>
               ))}
             </ul>
+            {c.monto != null && <p className="mt-0.5 text-xs text-muted">💵 ${fmtMonto(c.monto)}</p>}
           </li>
         ))}
         {(!proveedor.compras || proveedor.compras.length === 0) && (
@@ -120,18 +132,11 @@ export function ProveedorDetailPage() {
                 const producto = productos.find((p) => p.id === it.productoId)
                 return (
                   <div key={idx} className="flex items-center gap-2">
-                    <select
+                    <ProductoAutocomplete
+                      productos={productos}
                       value={it.productoId}
-                      onChange={(e) => updateItem(idx, { productoId: e.target.value })}
-                      className="flex-1 rounded-md px-2 py-2 text-sm field-input"
-                    >
-                      <option value="">Producto</option>
-                      {productos.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nombre} ({p.unidad})
-                        </option>
-                      ))}
-                    </select>
+                      onSelect={(p) => updateItem(idx, { productoId: p.id })}
+                    />
                     <input
                       type="number"
                       step="0.01"
@@ -156,6 +161,19 @@ export function ProveedorDetailPage() {
             <button onClick={addItem} className="mt-2 text-sm font-bold link-accent">
               + Agregar producto
             </button>
+
+            <label className="mb-1 mt-4 block text-sm font-medium text-label">
+              Monto (opcional)
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="$"
+                value={monto}
+                onChange={(e) => setMonto(e.target.value)}
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+            </label>
 
             <div className="mt-5 flex gap-2">
               <button

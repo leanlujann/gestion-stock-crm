@@ -94,6 +94,7 @@ export interface Compra {
   fecha: string
   estado: string
   origen: string
+  monto: number | null
   items: CompraItem[]
 }
 

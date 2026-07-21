@@ -121,6 +121,7 @@ model Compra {
   fecha       DateTime     @default(now())
   estado      EstadoPedido @default(CONFIRMADO)
   origen      OrigenPedido @default(MANUAL)
+  monto       Float?
   items       CompraItem[]
   movimientos MovimientoStock[]
   createdAt   DateTime     @default(now())

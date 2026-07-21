@@ -39,6 +39,7 @@ export function StockPage() {
   const [query, setQuery] = useState('')
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
   const [agregandoLoteId, setAgregandoLoteId] = useState<string | null>(null)
+  const [cantidades, setCantidades] = useState<Record<string, string>>({})
 
   const load = () => {
     setLoading(true)
@@ -101,9 +102,12 @@ export function StockPage() {
     }
   }
 
-  const handleAjuste = async (producto: Producto, delta: number) => {
+  const handleAjuste = async (producto: Producto, signo: 1 | -1) => {
+    const cantidad = Number(cantidades[producto.id])
+    const delta = signo * (cantidad > 0 ? cantidad : 1)
     try {
       await api.post(`/productos/${producto.id}/ajustar-stock`, { delta })
+      setCantidades((prev) => ({ ...prev, [producto.id]: '' }))
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al ajustar stock')
@@ -195,18 +199,27 @@ export function StockPage() {
                 />
               </div>
 
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => handleAjuste(p, -1)}
-                  className="flex-1 rounded-md py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
+                  className="rounded-md px-3 py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
                 >
-                  -1 {p.unidad}
+                  −
                 </button>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder={`cant. ${p.unidad}`}
+                  value={cantidades[p.id] ?? ''}
+                  onChange={(e) => setCantidades((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                  className="w-0 flex-1 rounded-md px-2 py-1.5 text-center text-sm field-input"
+                />
                 <button
                   onClick={() => handleAjuste(p, 1)}
-                  className="flex-1 rounded-md py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
+                  className="rounded-md px-3 py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
                 >
-                  +1 {p.unidad}
+                  +
                 </button>
               </div>
 

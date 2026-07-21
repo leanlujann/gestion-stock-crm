@@ -41,6 +41,7 @@ export class ComprasService {
       const compra = await tx.compra.create({
         data: {
           proveedorId: dto.proveedorId,
+          monto: dto.monto,
           items: {
             create: dto.items.map((item) => ({
               productoId: item.productoId,
