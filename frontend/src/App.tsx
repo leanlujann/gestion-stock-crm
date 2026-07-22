@@ -7,8 +7,15 @@ import { ClienteDetailPage } from './pages/ClienteDetailPage'
 import { ProveedoresPage } from './pages/ProveedoresPage'
 import { ProveedorDetailPage } from './pages/ProveedorDetailPage'
 import { NotificacionesPage } from './pages/NotificacionesPage'
+import { LoginPage } from './pages/LoginPage'
+import { useAuth } from './auth'
 
 function App() {
+  const { autenticado, cargando } = useAuth()
+
+  if (cargando) return null
+  if (!autenticado) return <LoginPage />
+
   return (
     <Routes>
       <Route element={<Layout />}>

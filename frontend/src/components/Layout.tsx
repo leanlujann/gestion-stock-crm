@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { ThemeToggle } from './ThemeToggle'
 import { useTheme } from '../theme'
+import { useAuth } from '../auth'
 
 const TABS = [
   { to: '/', label: 'Stock', icon: '📦', end: true },
@@ -28,8 +29,10 @@ const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
 
 export function Layout() {
   const [noLeidas, setNoLeidas] = useState(0)
+  const [menuAbierto, setMenuAbierto] = useState(false)
   const location = useLocation()
   const { theme } = useTheme()
+  const { username, logout } = useAuth()
   const scene = getScene(location.pathname)
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export function Layout() {
 
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-md bg-[#EDE6D6]/50 dark:bg-black/15">
         <h1 className="heading-display text-lg">Gestión de Stock</h1>
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <ThemeToggle />
           <NavLink
             to="/notificaciones"
@@ -75,6 +78,28 @@ export function Layout() {
               </span>
             )}
           </NavLink>
+          <button
+            onClick={() => setMenuAbierto((v) => !v)}
+            aria-label="Cuenta"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
+          >
+            👤
+          </button>
+          {menuAbierto && (
+            <div className="absolute right-0 top-11 z-20 w-48 rounded-md p-3 shadow-lg surface">
+              <p className="mb-2 truncate text-xs text-muted">Conectado como</p>
+              <p className="mb-3 truncate text-sm font-bold text-heading">{username}</p>
+              <button
+                onClick={() => {
+                  setMenuAbierto(false)
+                  logout()
+                }}
+                className="w-full rounded-md py-2 text-xs font-bold uppercase tracking-wide surface-muted-hover text-red-600 dark:text-red-400"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

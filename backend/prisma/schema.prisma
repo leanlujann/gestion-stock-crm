@@ -36,6 +36,13 @@ enum TipoNotificacion {
   COMPRA_REGISTRADA
 }
 
+model Usuario {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
 model Producto {
   id           String   @id @default(cuid())
   nombre       String
