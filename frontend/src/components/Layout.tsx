@@ -86,19 +86,22 @@ export function Layout() {
             👤
           </button>
           {menuAbierto && (
-            <div className="absolute right-0 top-11 z-20 w-48 rounded-md p-3 shadow-lg surface">
-              <p className="mb-2 truncate text-xs text-muted">Conectado como</p>
-              <p className="mb-3 truncate text-sm font-bold text-heading">{username}</p>
-              <button
-                onClick={() => {
-                  setMenuAbierto(false)
-                  logout()
-                }}
-                className="w-full rounded-md py-2 text-xs font-bold uppercase tracking-wide surface-muted-hover text-red-600 dark:text-red-400"
-              >
-                Cerrar sesión
-              </button>
-            </div>
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setMenuAbierto(false)} aria-hidden="true" />
+              <div className="absolute right-0 top-11 z-40 w-48 rounded-md p-3 shadow-lg surface">
+                <p className="mb-2 truncate text-xs text-muted">Conectado como</p>
+                <p className="mb-3 truncate text-sm font-bold text-heading">{username}</p>
+                <button
+                  onClick={() => {
+                    setMenuAbierto(false)
+                    logout()
+                  }}
+                  className="w-full rounded-md py-2 text-xs font-bold uppercase tracking-wide surface-muted-hover text-red-600 dark:text-red-400"
+                >
+                  Cerrar sesión
+                </button>
+              </div>
+            </>
           )}
         </div>
       </header>

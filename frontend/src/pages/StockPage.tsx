@@ -196,49 +196,45 @@ export function StockPage() {
           const proximo = proximoVencimiento(lotes)
           const expandido = expandidos.has(p.id)
           return (
-            <li key={p.id} className="rounded-lg p-4 surface">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-bold uppercase tracking-wide text-heading">
-                    {p.nombre}
-                    {proximo && (
-                      <span className={`ml-2 text-xs font-normal normal-case ${fmtVencimiento(proximo.fechaVencimiento!).color}`}>
-                        venc. {fmtVencimiento(proximo.fechaVencimiento!).texto}
-                        {lotes.length > 1 && ` (+${lotes.length - 1} más)`}
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-secondary">
-                    {p.stockActual} {p.unidad} <span className="text-muted">· mínimo {p.stockMinimo}</span>
-                    {p.precio != null && <span className="text-muted"> · ${p.precio}/{p.unidad}</span>}
-                  </p>
-                  {p.proveedor && <p className="text-xs text-muted">Proveedor: {p.proveedor.nombre}</p>}
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <button
-                    onClick={() => openEditar(p)}
-                    className="rounded-md px-3 py-1 text-xs font-bold uppercase tracking-wide surface-muted text-label"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => setBorrando(p)}
-                    aria-label={`Borrar ${p.nombre}`}
-                    className="rounded-md px-2.5 py-1 text-xs font-bold surface-muted text-red-600 dark:text-red-400"
-                  >
-                    🗑
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-3 h-2 w-full overflow-hidden rounded-full surface-muted">
-                <div
-                  className={`h-full rounded-full ${estadoColor(p)}`}
-                  style={{ width: `${ratio * 100}%` }}
+            <li key={p.id} className="overflow-hidden rounded-lg surface">
+              <button
+                type="button"
+                onClick={() => toggleExpandido(p.id)}
+                aria-expanded={expandido}
+                className="flex w-full items-start gap-3 p-4 text-left"
+              >
+                <span
+                  className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${estadoColor(p)}`}
+                  aria-hidden="true"
                 />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold uppercase tracking-wide text-heading">
+                    {p.nombre}
+                  </span>
+                  {proximo && (
+                    <span className={`block text-xs font-normal ${fmtVencimiento(proximo.fechaVencimiento!).color}`}>
+                      venc. {fmtVencimiento(proximo.fechaVencimiento!).texto}
+                      {lotes.length > 1 && ` (+${lotes.length - 1} más)`}
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block text-lg font-bold leading-tight text-heading">{p.stockActual}</span>
+                  <span className="block text-xs text-muted">{p.unidad}</span>
+                </span>
+                <span className="mt-1.5 shrink-0 text-muted">{expandido ? '▾' : '▸'}</span>
+              </button>
+
+              <div className="px-4">
+                <div className="h-2 w-full overflow-hidden rounded-full surface-muted">
+                  <div
+                    className={`h-full rounded-full ${estadoColor(p)}`}
+                    style={{ width: `${ratio * 100}%` }}
+                  />
+                </div>
               </div>
 
-              <div className="mt-3 flex items-center gap-2">
+              <div className="flex items-center gap-2 p-4">
                 <button
                   onClick={() => handleAjuste(p, -1)}
                   className="rounded-md px-3 py-1.5 text-sm font-bold surface-muted surface-muted-hover text-label"
@@ -262,81 +258,98 @@ export function StockPage() {
                 </button>
               </div>
 
-              <div className="mt-3 flex items-center justify-between border-t pt-2 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
-                {lotes.length > 0 ? (
-                  <button
-                    onClick={() => toggleExpandido(p.id)}
-                    className="text-xs font-bold uppercase tracking-wide link-accent"
-                  >
-                    {expandido ? '▾' : '▸'} Ver lotes ({lotes.length})
-                  </button>
-                ) : (
-                  <span className="text-xs text-muted">Sin vencimiento registrado</span>
-                )}
-                <button
-                  onClick={() => setAgregandoLoteId(agregandoLoteId === p.id ? null : p.id)}
-                  className="text-xs font-bold uppercase tracking-wide link-accent"
-                >
-                  + Lote
-                </button>
-              </div>
-
               {expandido && (
-                <ul className="mt-2 flex flex-col gap-1">
-                  {lotes.length === 0 && <li className="text-xs text-muted">Sin lotes registrados.</li>}
-                  {lotes.map((l) => (
-                    <li key={l.id} className="flex items-baseline justify-between text-xs">
-                      <span className="text-secondary">
-                        {l.cantidad} {p.unidad}
-                        {l.notas && <span className="text-muted"> · {l.notas}</span>}
-                      </span>
-                      <span className={l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).color : 'text-muted'}>
-                        {l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).texto : 'sin fecha'}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                <div className="flex flex-col gap-3 border-t p-4 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
+                  <p className="text-xs text-secondary">
+                    mínimo {p.stockMinimo} {p.unidad}
+                    {p.precio != null && <span className="text-muted"> · ${p.precio}/{p.unidad}</span>}
+                  </p>
+                  {p.proveedor && <p className="-mt-2 text-xs text-muted">Proveedor: {p.proveedor.nombre}</p>}
 
-              {agregandoLoteId === p.id && (
-                <form
-                  onSubmit={(e) => handleAgregarLote(e, p.id)}
-                  className="mt-2 flex flex-col gap-2 rounded-md p-2 surface-muted"
-                >
-                  <div className="flex gap-2">
-                    <input
-                      name="cantidad"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      required
-                      placeholder={`cant. ${p.unidad}`}
-                      className="w-24 rounded-md px-2 py-1.5 text-sm field-input"
-                    />
-                    <input
-                      name="fechaVencimiento"
-                      type="date"
-                      className="flex-1 rounded-md px-2 py-1.5 text-sm field-input"
-                    />
-                  </div>
-                  <input
-                    name="notas"
-                    placeholder="Notas (opcional)"
-                    className="rounded-md px-2 py-1.5 text-sm field-input"
-                  />
                   <div className="flex gap-2">
                     <button
-                      type="button"
-                      onClick={() => setAgregandoLoteId(null)}
-                      className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide surface-muted-hover text-label"
+                      onClick={() => openEditar(p)}
+                      className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide surface-muted text-label"
                     >
-                      Cancelar
+                      Editar
                     </button>
-                    <button type="submit" className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide btn-primary">
-                      Agregar
+                    <button
+                      onClick={() => setBorrando(p)}
+                      className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide surface-muted text-red-600 dark:text-red-400"
+                    >
+                      🗑 Borrar
                     </button>
                   </div>
-                </form>
+
+                  <div className="flex items-center justify-between border-t pt-3 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
+                    <span className="text-xs text-muted">
+                      {lotes.length > 0 ? `${lotes.length} lote(s) registrado(s)` : 'Sin vencimiento registrado'}
+                    </span>
+                    <button
+                      onClick={() => setAgregandoLoteId(agregandoLoteId === p.id ? null : p.id)}
+                      className="text-xs font-bold uppercase tracking-wide link-accent"
+                    >
+                      + Lote
+                    </button>
+                  </div>
+
+                  {lotes.length > 0 && (
+                    <ul className="flex flex-col gap-1">
+                      {lotes.map((l) => (
+                        <li key={l.id} className="flex items-baseline justify-between text-xs">
+                          <span className="text-secondary">
+                            {l.cantidad} {p.unidad}
+                            {l.notas && <span className="text-muted"> · {l.notas}</span>}
+                          </span>
+                          <span className={l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).color : 'text-muted'}>
+                            {l.fechaVencimiento ? fmtVencimiento(l.fechaVencimiento).texto : 'sin fecha'}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {agregandoLoteId === p.id && (
+                    <form
+                      onSubmit={(e) => handleAgregarLote(e, p.id)}
+                      className="flex flex-col gap-2 rounded-md p-2 surface-muted"
+                    >
+                      <div className="flex gap-2">
+                        <input
+                          name="cantidad"
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          required
+                          placeholder={`cant. ${p.unidad}`}
+                          className="w-24 rounded-md px-2 py-1.5 text-sm field-input"
+                        />
+                        <input
+                          name="fechaVencimiento"
+                          type="date"
+                          className="flex-1 rounded-md px-2 py-1.5 text-sm field-input"
+                        />
+                      </div>
+                      <input
+                        name="notas"
+                        placeholder="Notas (opcional)"
+                        className="rounded-md px-2 py-1.5 text-sm field-input"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setAgregandoLoteId(null)}
+                          className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide surface-muted-hover text-label"
+                        >
+                          Cancelar
+                        </button>
+                        <button type="submit" className="flex-1 rounded-md py-1.5 text-xs font-bold uppercase tracking-wide btn-primary">
+                          Agregar
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               )}
             </li>
           )
@@ -481,57 +494,58 @@ export function StockPage() {
       )}
 
       {borrando && (
-        <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
+        <div
+          className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !procesandoBorrado) {
+              setBorrando(null)
+              setError('')
+            }
+          }}
+        >
           <div className="w-full max-w-sm rounded-t-2xl p-5 sm:rounded-lg surface">
             <h3 className="heading-display mb-2 text-base">Quitar "{borrando.nombre}"</h3>
             <p className="mb-4 text-sm text-secondary">
-              Elegí cómo querés quitarlo del stock.
+              Elegí cómo querés quitarlo del stock, o tocá afuera para cancelar.
             </p>
 
-            <div className="mb-3 rounded-md p-3 surface-muted">
+            <button
+              type="button"
+              disabled={procesandoBorrado}
+              onClick={() => handleArchivar(borrando)}
+              className="mb-3 w-full rounded-md p-3 text-left surface-muted surface-muted-hover disabled:opacity-50"
+            >
               <p className="text-sm font-bold uppercase tracking-wide text-label">Archivar</p>
               <p className="mt-1 text-xs text-secondary">
                 Lo oculta de la lista pero conserva su historial de movimientos, pedidos y compras. Reversible desde la base de datos.
               </p>
-            </div>
-            <div className="mb-4 rounded-md p-3 surface-muted">
+            </button>
+
+            <button
+              type="button"
+              disabled={procesandoBorrado}
+              onClick={() => handleBorrarDefinitivo(borrando)}
+              className="mb-4 w-full rounded-md p-3 text-left surface-muted surface-muted-hover disabled:opacity-50"
+            >
               <p className="text-sm font-bold uppercase tracking-wide text-red-600 dark:text-red-400">Borrar definitivamente</p>
               <p className="mt-1 text-xs text-secondary">
                 Elimina el producto y todo su historial asociado (movimientos, notificaciones, ítems de pedidos y compras). No se puede deshacer.
               </p>
-            </div>
+            </button>
 
             {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
 
-            <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                disabled={procesandoBorrado}
-                onClick={() => handleArchivar(borrando)}
-                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary disabled:opacity-50"
-              >
-                Archivar
-              </button>
-              <button
-                type="button"
-                disabled={procesandoBorrado}
-                onClick={() => handleBorrarDefinitivo(borrando)}
-                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-red-600 dark:text-red-400 disabled:opacity-50"
-              >
-                Borrar definitivamente
-              </button>
-              <button
-                type="button"
-                disabled={procesandoBorrado}
-                onClick={() => {
-                  setBorrando(null)
-                  setError('')
-                }}
-                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted-hover text-label disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={procesandoBorrado}
+              onClick={() => {
+                setBorrando(null)
+                setError('')
+              }}
+              className="w-full rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted-hover text-label disabled:opacity-50"
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       )}
