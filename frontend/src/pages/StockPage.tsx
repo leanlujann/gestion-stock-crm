@@ -175,7 +175,7 @@ export function StockPage() {
         </button>
       </div>
 
-      <div className="relative mb-4">
+      <div className="relative mb-4 search-wrap">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-muted">
           🔍
         </span>
@@ -183,7 +183,7 @@ export function StockPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar producto..."
-          className="w-full rounded-md py-2.5 pl-10 pr-3 text-base field-input"
+          className="w-full py-2.5 pl-10 pr-3 text-base search-input"
         />
       </div>
 

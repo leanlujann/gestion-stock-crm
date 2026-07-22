@@ -34,6 +34,15 @@ h1, h2, h3, .heading-display {
   .field-input {
     @apply border-2 border-[#17140F]/70 bg-[#F6F2E9] dark:border dark:border-white/20 dark:bg-white/10 dark:text-[#EDE6D6] dark:backdrop-blur-md dark:placeholder-white/40;
   }
+  /* buscador con icono: el desenfoque va en el contenedor (search-wrap), no en el
+     input, para que el icono superpuesto no quede atrapado en la misma capa de
+     blur (en iOS Safari eso hace que el icono se vea borroso). */
+  .search-wrap {
+    @apply rounded-md border-2 border-[#17140F]/70 bg-[#F6F2E9] dark:border dark:border-white/20 dark:bg-white/10 dark:backdrop-blur-md;
+  }
+  .search-input {
+    @apply border-0 bg-transparent dark:text-[#EDE6D6] dark:placeholder-white/40;
+  }
   /* titulos de seccion: bold, mayuscula, tracked */
   .heading-display {
     @apply font-bold uppercase tracking-wide text-[#17140F] dark:text-[#EDE6D6];

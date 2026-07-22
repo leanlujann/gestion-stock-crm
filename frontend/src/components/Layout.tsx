@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api/client'
 import { ThemeToggle } from './ThemeToggle'
 import { useTheme } from '../theme'
@@ -30,10 +30,20 @@ const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
 export function Layout() {
   const [noLeidas, setNoLeidas] = useState(0)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { theme } = useTheme()
   const { username, logout } = useAuth()
   const scene = getScene(location.pathname)
+
+  useEffect(() => {
+    if (!menuAbierto) return
+    const cerrarSiToqueAfuera = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuAbierto(false)
+    }
+    document.addEventListener('pointerdown', cerrarSiToqueAfuera)
+    return () => document.removeEventListener('pointerdown', cerrarSiToqueAfuera)
+  }, [menuAbierto])
 
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]')
@@ -78,17 +88,16 @@ export function Layout() {
               </span>
             )}
           </NavLink>
-          <button
-            onClick={() => setMenuAbierto((v) => !v)}
-            aria-label="Cuenta"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
-          >
-            👤
-          </button>
-          {menuAbierto && (
-            <>
-              <div className="fixed inset-0 z-30" onClick={() => setMenuAbierto(false)} aria-hidden="true" />
-              <div className="absolute right-0 top-11 z-40 w-48 rounded-md p-3 shadow-lg surface">
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setMenuAbierto((v) => !v)}
+              aria-label="Cuenta"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
+            >
+              👤
+            </button>
+            {menuAbierto && (
+              <div className="absolute right-0 top-11 z-20 w-48 rounded-md p-3 shadow-lg surface">
                 <p className="mb-2 truncate text-xs text-muted">Conectado como</p>
                 <p className="mb-3 truncate text-sm font-bold text-heading">{username}</p>
                 <button
@@ -101,8 +110,8 @@ export function Layout() {
                   Cerrar sesión
                 </button>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </header>
 
