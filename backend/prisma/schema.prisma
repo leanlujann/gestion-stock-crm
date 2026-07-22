@@ -43,6 +43,7 @@ model Producto {
   stockActual  Float    @default(0)
   stockMinimo  Float    @default(50)
   precio       Float?
+  activo       Boolean  @default(true)
   proveedorId  String?
   proveedor    Proveedor? @relation(fields: [proveedorId], references: [id])
   createdAt    DateTime @default(now())

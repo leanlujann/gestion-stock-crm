@@ -42,6 +42,11 @@ export class ProductosController {
     return this.productosService.remove(id);
   }
 
+  @Patch(':id/archivar')
+  archive(@Param('id') id: string) {
+    return this.productosService.archive(id);
+  }
+
   @Post(':id/ajustar-stock')
   adjustStock(@Param('id') id: string, @Body() dto: AdjustStockDto) {
     return this.productosService.adjustStock(id, dto.delta);

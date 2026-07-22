@@ -40,6 +40,8 @@ export function StockPage() {
   const [expandidos, setExpandidos] = useState<Set<string>>(new Set())
   const [agregandoLoteId, setAgregandoLoteId] = useState<string | null>(null)
   const [cantidades, setCantidades] = useState<Record<string, string>>({})
+  const [borrando, setBorrando] = useState<Producto | null>(null)
+  const [procesandoBorrado, setProcesandoBorrado] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -102,14 +104,31 @@ export function StockPage() {
     }
   }
 
-  const handleEliminar = async (producto: Producto) => {
-    if (!window.confirm(`¿Borrar "${producto.nombre}" del stock? Esta acción no se puede deshacer.`)) return
+  const handleArchivar = async (producto: Producto) => {
     setError('')
+    setProcesandoBorrado(true)
+    try {
+      await api.patch(`/productos/${producto.id}/archivar`, {})
+      setBorrando(null)
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al archivar el producto')
+    } finally {
+      setProcesandoBorrado(false)
+    }
+  }
+
+  const handleBorrarDefinitivo = async (producto: Producto) => {
+    setError('')
+    setProcesandoBorrado(true)
     try {
       await api.delete(`/productos/${producto.id}`)
+      setBorrando(null)
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al borrar el producto')
+    } finally {
+      setProcesandoBorrado(false)
     }
   }
 
@@ -203,7 +222,7 @@ export function StockPage() {
                     Editar
                   </button>
                   <button
-                    onClick={() => handleEliminar(p)}
+                    onClick={() => setBorrando(p)}
                     aria-label={`Borrar ${p.nombre}`}
                     className="rounded-md px-2.5 py-1 text-xs font-bold surface-muted text-red-600 dark:text-red-400"
                   >
@@ -458,6 +477,62 @@ export function StockPage() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {borrando && (
+        <div className="fixed inset-0 z-20 flex items-end bg-black/40 sm:items-center sm:justify-center">
+          <div className="w-full max-w-sm rounded-t-2xl p-5 sm:rounded-lg surface">
+            <h3 className="heading-display mb-2 text-base">Quitar "{borrando.nombre}"</h3>
+            <p className="mb-4 text-sm text-secondary">
+              Elegí cómo querés quitarlo del stock.
+            </p>
+
+            <div className="mb-3 rounded-md p-3 surface-muted">
+              <p className="text-sm font-bold uppercase tracking-wide text-label">Archivar</p>
+              <p className="mt-1 text-xs text-secondary">
+                Lo oculta de la lista pero conserva su historial de movimientos, pedidos y compras. Reversible desde la base de datos.
+              </p>
+            </div>
+            <div className="mb-4 rounded-md p-3 surface-muted">
+              <p className="text-sm font-bold uppercase tracking-wide text-red-600 dark:text-red-400">Borrar definitivamente</p>
+              <p className="mt-1 text-xs text-secondary">
+                Elimina el producto y todo su historial asociado (movimientos, notificaciones, ítems de pedidos y compras). No se puede deshacer.
+              </p>
+            </div>
+
+            {error && <p className="mb-3 rounded-md p-3 text-sm error-banner">{error}</p>}
+
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                disabled={procesandoBorrado}
+                onClick={() => handleArchivar(borrando)}
+                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary disabled:opacity-50"
+              >
+                Archivar
+              </button>
+              <button
+                type="button"
+                disabled={procesandoBorrado}
+                onClick={() => handleBorrarDefinitivo(borrando)}
+                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted text-red-600 dark:text-red-400 disabled:opacity-50"
+              >
+                Borrar definitivamente
+              </button>
+              <button
+                type="button"
+                disabled={procesandoBorrado}
+                onClick={() => {
+                  setBorrando(null)
+                  setError('')
+                }}
+                className="rounded-md py-2.5 text-sm font-bold uppercase tracking-wide surface-muted-hover text-label disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

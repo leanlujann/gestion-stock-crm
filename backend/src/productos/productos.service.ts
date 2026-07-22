@@ -1,5 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
@@ -11,6 +10,7 @@ export class ProductosService {
 
   findAll() {
     return this.prisma.producto.findMany({
+      where: { activo: true },
       include: {
         proveedor: true,
         lotes: { orderBy: { fechaVencimiento: 'asc' } },
@@ -63,18 +63,20 @@ export class ProductosService {
     return this.prisma.producto.update({ where: { id }, data: dto });
   }
 
+  async archive(id: string) {
+    await this.findOne(id);
+    return this.prisma.producto.update({ where: { id }, data: { activo: false } });
+  }
+
   async remove(id: string) {
-    const producto = await this.findOne(id);
-    try {
-      return await this.prisma.producto.delete({ where: { id } });
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
-        throw new BadRequestException(
-          `No se puede borrar "${producto.nombre}": tiene pedidos, compras o movimientos registrados. Si ya no lo usás, dejalo en 0 de stock en vez de borrarlo.`,
-        );
-      }
-      throw err;
-    }
+    await this.findOne(id);
+    return this.prisma.$transaction(async (tx) => {
+      await tx.notificacion.deleteMany({ where: { productoId: id } });
+      await tx.movimientoStock.deleteMany({ where: { productoId: id } });
+      await tx.pedidoItem.deleteMany({ where: { productoId: id } });
+      await tx.compraItem.deleteMany({ where: { productoId: id } });
+      return tx.producto.delete({ where: { id } });
+    });
   }
 
   async addLote(id: string, dto: CreateLoteDto) {
