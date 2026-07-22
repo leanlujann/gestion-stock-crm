@@ -97,7 +97,7 @@ export function Layout() {
               👤
             </button>
             {menuAbierto && (
-              <div className="absolute right-0 top-11 z-20 w-48 rounded-md p-3 shadow-lg surface">
+              <div className="absolute right-0 top-11 z-20 w-48 rounded-md p-3 shadow-lg surface-solid">
                 <p className="mb-2 truncate text-xs text-muted">Conectado como</p>
                 <p className="mb-3 truncate text-sm font-bold text-heading">{username}</p>
                 <button

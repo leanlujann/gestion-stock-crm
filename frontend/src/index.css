@@ -23,6 +23,13 @@ h1, h2, h3, .heading-display {
   .surface {
     @apply border-2 border-[#17140F] bg-[#F6F2E9] dark:border dark:border-white/15 dark:bg-white/10 dark:backdrop-blur-xl dark:shadow-xl dark:shadow-black/30;
   }
+  /* igual que .surface pero sin backdrop-blur: para paneles que caen dentro de
+     otro elemento que ya tiene su propio backdrop-filter (ej. el menu de cuenta
+     dentro del header). Anidar backdrop-filter rompe el compositing en iOS
+     Safari y el panel se ve transparente en vez de esmerilado. */
+  .surface-solid {
+    @apply border-2 border-[#17140F] bg-[#F6F2E9] dark:border dark:border-white/15 dark:bg-[#16241F] dark:shadow-xl dark:shadow-black/30;
+  }
   /* chips, botones secundarios, barras de progreso vacías */
   .surface-muted {
     @apply bg-[#E2D9C4] dark:bg-white/10 dark:backdrop-blur-md;

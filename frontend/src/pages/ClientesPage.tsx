@@ -29,6 +29,7 @@ export function ClientesPage() {
       await api.post('/clientes', {
         nombre: String(form.get('nombre')),
         telefono: String(form.get('telefono')) || undefined,
+        direccion: String(form.get('direccion')) || undefined,
       })
       setShowForm(false)
       load()
@@ -101,10 +102,18 @@ export function ClientesPage() {
                 className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>
-            <label className="mb-4 block text-sm font-medium text-label">
+            <label className="mb-3 block text-sm font-medium text-label">
               Teléfono (opcional)
               <input
                 name="telefono"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+            </label>
+            <label className="mb-4 block text-sm font-medium text-label">
+              Dirección (opcional)
+              <input
+                name="direccion"
+                placeholder="Calle, número, ciudad..."
                 className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
               />
             </label>

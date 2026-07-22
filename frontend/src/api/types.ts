@@ -40,6 +40,7 @@ export interface Cliente {
   id: string
   nombre: string
   telefono: string | null
+  direccion: string | null
   notas: string | null
   createdAt: string
   updatedAt: string

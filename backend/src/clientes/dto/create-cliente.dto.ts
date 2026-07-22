@@ -11,5 +11,9 @@ export class CreateClienteDto {
 
   @IsOptional()
   @IsString()
+  direccion?: string;
+
+  @IsOptional()
+  @IsString()
   notas?: string;
 }
