@@ -12,7 +12,9 @@ import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { CreateLoteDto } from './dto/create-lote.dto';
+import { Roles } from '../auth/roles.decorator';
 
+@Roles('STAFF')
 @Controller('productos')
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
@@ -20,6 +22,12 @@ export class ProductosController {
   @Get()
   findAll() {
     return this.productosService.findAll();
+  }
+
+  @Roles('STAFF', 'CLIENTE')
+  @Get('catalogo')
+  catalogo() {
+    return this.productosService.catalogo();
   }
 
   @Get(':id')

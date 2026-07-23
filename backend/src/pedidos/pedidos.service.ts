@@ -1,7 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { OrigenPedido } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CalendarService } from '../calendar/calendar.service';
-import { CreatePedidoDto } from './dto/create-pedido.dto';
+import { CreatePedidoDto, PedidoItemDto } from './dto/create-pedido.dto';
+import { CrearPedidoClienteDto } from './dto/crear-pedido-cliente.dto';
 
 @Injectable()
 export class PedidosService {
@@ -17,6 +19,14 @@ export class PedidosService {
     });
   }
 
+  misPedidos(clienteId: string) {
+    return this.prisma.pedido.findMany({
+      where: { clienteId },
+      orderBy: { fecha: 'desc' },
+      include: { cliente: true, items: { include: { producto: true } } },
+    });
+  }
+
   async findOne(id: string) {
     const pedido = await this.prisma.pedido.findUnique({
       where: { id },
@@ -26,17 +36,31 @@ export class PedidosService {
     return pedido;
   }
 
-  async create(dto: CreatePedidoDto) {
-    const cliente = await this.prisma.cliente.findUnique({ where: { id: dto.clienteId } });
+  create(dto: CreatePedidoDto) {
+    return this.crearPedido(dto.clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'MANUAL');
+  }
+
+  async crearMio(clienteId: string, dto: CrearPedidoClienteDto) {
+    return this.crearPedido(clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'CLIENTE');
+  }
+
+  private async crearPedido(
+    clienteId: string,
+    items: PedidoItemDto[],
+    direccion: string | undefined,
+    fechaEntrega: string | undefined,
+    origen: OrigenPedido,
+  ) {
+    const cliente = await this.prisma.cliente.findUnique({ where: { id: clienteId } });
     if (!cliente) throw new NotFoundException('Cliente no encontrado');
 
     const productos = await this.prisma.producto.findMany({
-      where: { id: { in: dto.items.map((i) => i.productoId) } },
+      where: { id: { in: items.map((i) => i.productoId) } },
     });
 
     const productosPorId = new Map(productos.map((p) => [p.id, p]));
 
-    for (const item of dto.items) {
+    for (const item of items) {
       const producto = productosPorId.get(item.productoId);
       if (!producto) {
         throw new NotFoundException(`Producto ${item.productoId} no encontrado`);
@@ -48,7 +72,7 @@ export class PedidosService {
       }
     }
 
-    const monto = dto.items.reduce((total, item) => {
+    const monto = items.reduce((total, item) => {
       const producto = productosPorId.get(item.productoId)!;
       return total + item.cantidad * (producto.precio ?? 0);
     }, 0);
@@ -56,12 +80,13 @@ export class PedidosService {
     const pedido = await this.prisma.$transaction(async (tx) => {
       const pedido = await tx.pedido.create({
         data: {
-          clienteId: dto.clienteId,
-          direccion: dto.direccion,
+          clienteId,
+          direccion,
           monto,
-          fechaEntrega: dto.fechaEntrega ? new Date(dto.fechaEntrega) : undefined,
+          origen,
+          fechaEntrega: fechaEntrega ? new Date(fechaEntrega) : undefined,
           items: {
-            create: dto.items.map((item) => ({
+            create: items.map((item) => ({
               productoId: item.productoId,
               cantidad: item.cantidad,
               unidad: productosPorId.get(item.productoId)!.unidad,
@@ -71,7 +96,7 @@ export class PedidosService {
         include: { cliente: true, items: { include: { producto: true } } },
       });
 
-      for (const item of dto.items) {
+      for (const item of items) {
         const producto = productosPorId.get(item.productoId)!;
         const actualizado = await tx.producto.update({
           where: { id: item.productoId },
@@ -101,7 +126,7 @@ export class PedidosService {
       await tx.notificacion.create({
         data: {
           tipo: 'PEDIDO_NUEVO',
-          mensaje: `Nuevo pedido de ${cliente.nombre} (${dto.items.length} producto${dto.items.length > 1 ? 's' : ''}).`,
+          mensaje: `Nuevo pedido de ${cliente.nombre} (${items.length} producto${items.length > 1 ? 's' : ''}).`,
         },
       });
 

@@ -5,15 +5,21 @@ import { ThemeToggle } from '../components/ThemeToggle'
 
 const SCENE_COLOR = { light: '#eaf7f0', dark: '#071f1a' }
 
+type Modo = 'login' | 'registro-cliente'
+
 export function LoginPage() {
-  const { tieneUsuarios, login, register } = useAuth()
+  const { tieneUsuarios, login, register, registerCliente } = useAuth()
   const { theme } = useTheme()
+  const [modo, setModo] = useState<Modo>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [direccion, setDireccion] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const esRegistro = tieneUsuarios === false
+  const bootstrapStaff = tieneUsuarios === false
 
   useEffect(() => {
     document.documentElement.setAttribute('data-scene', 'stock')
@@ -26,8 +32,10 @@ export function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      if (esRegistro) {
+      if (bootstrapStaff) {
         await register(username, password)
+      } else if (modo === 'registro-cliente') {
+        await registerCliente({ username, password, nombre, telefono: telefono || undefined, direccion: direccion || undefined })
       } else {
         await login(username, password)
       }
@@ -37,6 +45,13 @@ export function LoginPage() {
       setLoading(false)
     }
   }
+
+  const cambiarModo = (nuevo: Modo) => {
+    setModo(nuevo)
+    setError('')
+  }
+
+  const esRegistroCliente = !bootstrapStaff && modo === 'registro-cliente'
 
   return (
     <div className="flex h-dvh flex-col app-bg">
@@ -52,7 +67,11 @@ export function LoginPage() {
             <span className="mb-2 text-3xl" aria-hidden="true">📦</span>
             <h1 className="heading-display text-lg">Gestión de Stock</h1>
             <p className="mt-1 text-sm text-secondary">
-              {esRegistro ? 'Creá la cuenta de acceso a la app.' : 'Iniciá sesión para continuar.'}
+              {bootstrapStaff
+                ? 'Creá la cuenta de acceso a la app.'
+                : esRegistroCliente
+                  ? 'Creá tu cuenta de cliente para hacer pedidos.'
+                  : 'Iniciá sesión para continuar.'}
             </p>
           </div>
 
@@ -62,7 +81,7 @@ export function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              minLength={esRegistro ? 3 : 1}
+              minLength={bootstrapStaff || esRegistroCliente ? 3 : 1}
               autoFocus
               autoCapitalize="off"
               autoCorrect="off"
@@ -70,28 +89,74 @@ export function LoginPage() {
             />
           </label>
 
-          <label className="mb-4 block text-sm font-medium text-label">
+          {esRegistroCliente && (
+            <label className="mb-3 block text-sm font-medium text-label">
+              Nombre y apellido
+              <input
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                required
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+            </label>
+          )}
+
+          <label className="mb-3 block text-sm font-medium text-label">
             Contraseña
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               required
-              minLength={esRegistro ? 8 : 1}
+              minLength={bootstrapStaff || esRegistroCliente ? 8 : 1}
               className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
             />
-            {esRegistro && <span className="mt-1 block text-xs text-muted">Mínimo 8 caracteres.</span>}
+            {(bootstrapStaff || esRegistroCliente) && (
+              <span className="mt-1 block text-xs text-muted">Mínimo 8 caracteres.</span>
+            )}
           </label>
+
+          {esRegistroCliente && (
+            <>
+              <label className="mb-3 block text-sm font-medium text-label">
+                Teléfono (opcional)
+                <input
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+                />
+              </label>
+              <label className="mb-3 block text-sm font-medium text-label">
+                Dirección (opcional)
+                <input
+                  value={direccion}
+                  onChange={(e) => setDireccion(e.target.value)}
+                  placeholder="Calle, número, ciudad..."
+                  className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+                />
+              </label>
+            </>
+          )}
 
           {error && <p className="mb-4 rounded-md p-3 text-sm error-banner">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary disabled:opacity-50"
+            className="mb-3 w-full rounded-md py-2.5 text-sm font-bold uppercase tracking-wide btn-primary disabled:opacity-50"
           >
-            {loading ? 'Un momento...' : esRegistro ? 'Crear cuenta' : 'Entrar'}
+            {loading ? 'Un momento...' : bootstrapStaff ? 'Crear cuenta' : esRegistroCliente ? 'Crear cuenta' : 'Entrar'}
           </button>
+
+          {!bootstrapStaff && (
+            <button
+              type="button"
+              onClick={() => cambiarModo(modo === 'login' ? 'registro-cliente' : 'login')}
+              className="w-full text-center text-sm link-accent"
+            >
+              {modo === 'login' ? '¿Sos cliente? Creá tu cuenta' : 'Ya tengo cuenta, iniciar sesión'}
+            </button>
+          )}
         </form>
       </div>
     </div>

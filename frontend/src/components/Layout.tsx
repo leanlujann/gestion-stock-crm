@@ -1,22 +1,15 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
-import { api } from '../api/client'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ThemeToggle } from './ThemeToggle'
 import { useTheme } from '../theme'
 import { useAuth } from '../auth'
 
-const TABS = [
-  { to: '/', label: 'Stock', icon: '📦', end: true },
-  { to: '/pedidos', label: 'Pedidos', icon: '🧾' },
-  { to: '/clientes', label: 'Clientes', icon: '👥' },
-  { to: '/proveedores', label: 'Proveedores', icon: '🚚' },
-]
-
-function getScene(pathname: string) {
-  if (pathname.startsWith('/pedidos')) return 'pedidos'
-  if (pathname.startsWith('/clientes')) return 'crm'
-  if (pathname.startsWith('/proveedores')) return 'proveedores'
-  return 'stock'
+export interface TabDef {
+  to: string
+  label: string
+  icon: string
+  scene: string
+  end?: boolean
 }
 
 // espejo de los colores base definidos en index.css (.bg-scene-*)
@@ -27,14 +20,24 @@ const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
   proveedores: { light: '#f1f7e6', dark: '#10200a' },
 }
 
-export function Layout() {
-  const [noLeidas, setNoLeidas] = useState(0)
+function getScene(tabs: TabDef[], pathname: string) {
+  const activa = [...tabs].reverse().find((t) => (t.end ? pathname === t.to : pathname.startsWith(t.to)))
+  return activa?.scene ?? tabs[0]?.scene ?? 'stock'
+}
+
+interface LayoutProps {
+  titulo: string
+  tabs: TabDef[]
+  extraHeader?: ReactNode
+}
+
+export function Layout({ titulo, tabs, extraHeader }: LayoutProps) {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { theme } = useTheme()
   const { username, logout } = useAuth()
-  const scene = getScene(location.pathname)
+  const scene = getScene(tabs, location.pathname)
 
   useEffect(() => {
     if (!menuAbierto) return
@@ -51,43 +54,15 @@ export function Layout() {
     document.documentElement.setAttribute('data-scene', scene)
   }, [scene, theme])
 
-  useEffect(() => {
-    let cancelled = false
-    const load = () => {
-      api
-        .get<number>('/notificaciones/no-leidas/count')
-        .then((count) => {
-          if (!cancelled) setNoLeidas(count)
-        })
-        .catch(() => {})
-    }
-    load()
-    const interval = setInterval(load, 15000)
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
-  }, [])
-
   return (
     <div className="flex h-dvh flex-col app-bg">
       <div className={`bg-scene bg-scene-${scene}`} aria-hidden="true" />
 
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-md bg-[#EDE6D6]/50 dark:bg-black/15">
-        <h1 className="heading-display text-lg">Gestión de Stock</h1>
+        <h1 className="heading-display text-lg">{titulo}</h1>
         <div className="relative flex items-center gap-2">
           <ThemeToggle />
-          <NavLink
-            to="/notificaciones"
-            className="relative flex h-9 w-9 items-center justify-center rounded-full text-lg surface-muted"
-          >
-            🔔
-            {noLeidas > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
-                {noLeidas}
-              </span>
-            )}
-          </NavLink>
+          {extraHeader}
           <div ref={menuRef} className="relative">
             <button
               onClick={() => setMenuAbierto((v) => !v)}
@@ -124,7 +99,7 @@ export function Layout() {
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 14px)' }}
       >
         <div className="mx-auto flex max-w-lg items-center justify-between gap-1 px-2 py-2">
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <NavLink
               key={tab.to}
               to={tab.to}

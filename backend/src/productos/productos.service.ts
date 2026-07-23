@@ -19,6 +19,15 @@ export class ProductosService {
     });
   }
 
+  async catalogo() {
+    const productos = await this.prisma.producto.findMany({
+      where: { activo: true },
+      select: { id: true, nombre: true, unidad: true, precio: true, stockActual: true },
+      orderBy: { nombre: 'asc' },
+    });
+    return productos.map(({ stockActual, ...p }) => ({ ...p, disponible: stockActual > 0 }));
+  }
+
   async findOne(id: string) {
     const producto = await this.prisma.producto.findUnique({
       where: { id },

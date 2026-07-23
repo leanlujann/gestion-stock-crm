@@ -22,6 +22,12 @@ enum EstadoPedido {
 enum OrigenPedido {
   MANUAL
   WHATSAPP
+  CLIENTE
+}
+
+enum RolUsuario {
+  STAFF
+  CLIENTE
 }
 
 enum TipoMovimiento {
@@ -37,10 +43,13 @@ enum TipoNotificacion {
 }
 
 model Usuario {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String     @id @default(cuid())
+  username     String     @unique
   passwordHash String
-  createdAt    DateTime @default(now())
+  role         RolUsuario @default(STAFF)
+  clienteId    String?    @unique
+  cliente      Cliente?   @relation(fields: [clienteId], references: [id])
+  createdAt    DateTime   @default(now())
 }
 
 model Producto {
@@ -83,6 +92,7 @@ model Cliente {
   updatedAt DateTime @updatedAt
 
   pedidos   Pedido[]
+  usuario   Usuario?
 }
 
 model Proveedor {

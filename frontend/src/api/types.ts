@@ -1,5 +1,13 @@
 export type Unidad = 'KG' | 'LT' | 'UN'
 
+export interface ProductoCatalogo {
+  id: string
+  nombre: string
+  unidad: Unidad
+  precio: number | null
+  disponible: boolean
+}
+
 export interface Proveedor {
   id: string
   nombre: string
@@ -72,7 +80,7 @@ export interface Pedido {
   cliente: Cliente
   fecha: string
   estado: 'PENDIENTE_CONFIRMACION' | 'CONFIRMADO' | 'ENTREGADO' | 'RECHAZADO'
-  origen: 'MANUAL' | 'WHATSAPP'
+  origen: 'MANUAL' | 'WHATSAPP' | 'CLIENTE'
   direccion: string | null
   monto: number | null
   fechaEntrega: string | null
