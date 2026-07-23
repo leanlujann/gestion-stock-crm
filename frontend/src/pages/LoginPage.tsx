@@ -1,15 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useAuth } from '../auth'
-import { useTheme } from '../theme'
 import { ThemeToggle } from '../components/ThemeToggle'
-
-const SCENE_COLOR = { light: '#eaf7f0', dark: '#071f1a' }
 
 type Modo = 'login' | 'registro-cliente'
 
 export function LoginPage() {
   const { tieneUsuarios, login, register, registerCliente } = useAuth()
-  const { theme } = useTheme()
   const [modo, setModo] = useState<Modo>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -20,12 +16,6 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   const bootstrapStaff = tieneUsuarios === false
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-scene', 'stock')
-    const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', SCENE_COLOR[theme])
-  }, [theme])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -54,9 +44,7 @@ export function LoginPage() {
   const esRegistroCliente = !bootstrapStaff && modo === 'registro-cliente'
 
   return (
-    <div className="flex h-dvh flex-col app-bg">
-      <div className="bg-scene bg-scene-stock" aria-hidden="true" />
-
+    <>
       <div className="flex justify-end p-4">
         <ThemeToggle />
       </div>
@@ -159,6 +147,6 @@ export function LoginPage() {
           )}
         </form>
       </div>
-    </div>
+    </>
   )
 }

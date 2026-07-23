@@ -1,28 +1,13 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ThemeToggle } from './ThemeToggle'
-import { useTheme } from '../theme'
 import { useAuth } from '../auth'
 
 export interface TabDef {
   to: string
   label: string
   icon: string
-  scene: string
   end?: boolean
-}
-
-// espejo de los colores base definidos en index.css (.bg-scene-*)
-const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
-  stock: { light: '#eaf7f0', dark: '#071f1a' },
-  pedidos: { light: '#e9f6f6', dark: '#051e24' },
-  crm: { light: '#eaf6f4', dark: '#061b26' },
-  proveedores: { light: '#f1f7e6', dark: '#10200a' },
-}
-
-function getScene(tabs: TabDef[], pathname: string) {
-  const activa = [...tabs].reverse().find((t) => (t.end ? pathname === t.to : pathname.startsWith(t.to)))
-  return activa?.scene ?? tabs[0]?.scene ?? 'stock'
 }
 
 interface LayoutProps {
@@ -34,10 +19,7 @@ interface LayoutProps {
 export function Layout({ titulo, tabs, extraHeader }: LayoutProps) {
   const [menuAbierto, setMenuAbierto] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const location = useLocation()
-  const { theme } = useTheme()
   const { username, logout } = useAuth()
-  const scene = getScene(tabs, location.pathname)
 
   useEffect(() => {
     if (!menuAbierto) return
@@ -48,16 +30,8 @@ export function Layout({ titulo, tabs, extraHeader }: LayoutProps) {
     return () => document.removeEventListener('pointerdown', cerrarSiToqueAfuera)
   }, [menuAbierto])
 
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]')
-    if (meta) meta.setAttribute('content', SCENE_COLORS[scene][theme])
-    document.documentElement.setAttribute('data-scene', scene)
-  }, [scene, theme])
-
   return (
-    <div className="flex h-dvh flex-col app-bg">
-      <div className={`bg-scene bg-scene-${scene}`} aria-hidden="true" />
-
+    <>
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-md bg-[#EDE6D6]/50 dark:bg-black/15">
         <h1 className="heading-display text-lg">{titulo}</h1>
         <div className="relative flex items-center gap-2">
@@ -116,6 +90,6 @@ export function Layout({ titulo, tabs, extraHeader }: LayoutProps) {
           ))}
         </div>
       </nav>
-    </div>
+    </>
   )
 }
