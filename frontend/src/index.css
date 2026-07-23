@@ -83,6 +83,7 @@ h1, h2, h3, .heading-display {
   position: fixed;
   inset: 0;
   z-index: -1;
+  overflow: hidden;
   background-repeat: no-repeat;
   background-size: 180% 180%;
   animation: liquid-drift 34s ease-in-out infinite alternate;
@@ -98,8 +99,52 @@ h1, h2, h3, .heading-display {
   }
 }
 
+/* vetas finas verde claro que atraviesan el fondo en diagonal, a modo de
+   corriente lenta sobre el liquid glass. Capa aparte para no tocar los
+   4 gradientes por escena. */
+.bg-scene::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background-image: repeating-linear-gradient(
+    118deg,
+    transparent 0px,
+    transparent 128px,
+    rgba(134, 239, 172, 0.14) 128px,
+    rgba(134, 239, 172, 0.16) 130px,
+    transparent 130px,
+    transparent 258px
+  );
+  animation: line-drift 48s linear infinite;
+  pointer-events: none;
+}
+[data-theme='dark'] .bg-scene::after {
+  background-image: repeating-linear-gradient(
+    118deg,
+    transparent 0px,
+    transparent 128px,
+    rgba(134, 239, 172, 0.22) 128px,
+    rgba(134, 239, 172, 0.26) 130px,
+    transparent 130px,
+    transparent 258px
+  );
+}
+
+@keyframes line-drift {
+  0% {
+    transform: translate(-10%, -6%);
+  }
+  50% {
+    transform: translate(4%, 6%);
+  }
+  100% {
+    transform: translate(-10%, -6%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .bg-scene {
+  .bg-scene,
+  .bg-scene::after {
     animation: none;
   }
 }
