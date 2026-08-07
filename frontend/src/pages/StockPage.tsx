@@ -1,6 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { api } from '../api/client'
-import type { Lote, Producto, Proveedor, Unidad } from '../api/types'
+import type { Lote, MovimientoStock, Producto, Proveedor, Unidad } from '../api/types'
+
+const TIPO_LABEL: Record<MovimientoStock['tipo'], string> = {
+  VENTA: 'Venta',
+  COMPRA: 'Compra',
+  AJUSTE: 'Ajuste',
+}
+
+function fmtFechaHora(iso: string) {
+  const fecha = new Date(iso)
+  const dd = String(fecha.getDate()).padStart(2, '0')
+  const mm = String(fecha.getMonth() + 1).padStart(2, '0')
+  const hh = String(fecha.getHours()).padStart(2, '0')
+  const mi = String(fecha.getMinutes()).padStart(2, '0')
+  return `${dd}/${mm} ${hh}:${mi}`
+}
 
 function estadoColor(producto: Producto) {
   const ratio = producto.stockActual / producto.stockMinimo
@@ -42,6 +57,9 @@ export function StockPage() {
   const [cantidades, setCantidades] = useState<Record<string, string>>({})
   const [borrando, setBorrando] = useState<Producto | null>(null)
   const [procesandoBorrado, setProcesandoBorrado] = useState(false)
+  const [historialAbiertoId, setHistorialAbiertoId] = useState<string | null>(null)
+  const [historiales, setHistoriales] = useState<Record<string, MovimientoStock[]>>({})
+  const [cargandoHistorialId, setCargandoHistorialId] = useState<string | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -84,6 +102,7 @@ export function StockPage() {
       unidad: String(form.get('unidad')) as Unidad,
       stockMinimo: Number(form.get('stockMinimo')),
       precio: form.get('precio') ? Number(form.get('precio')) : undefined,
+      costo: form.get('costo') ? Number(form.get('costo')) : undefined,
       proveedorId: String(form.get('proveedorId')) || undefined,
     }
     try {
@@ -132,12 +151,21 @@ export function StockPage() {
     }
   }
 
+  const invalidarHistorial = (productoId: string) => {
+    setHistoriales((prev) => {
+      if (!(productoId in prev)) return prev
+      const { [productoId]: _omitido, ...resto } = prev
+      return resto
+    })
+  }
+
   const handleAjuste = async (producto: Producto, signo: 1 | -1) => {
     const cantidad = Number(cantidades[producto.id])
     const delta = signo * (cantidad > 0 ? cantidad : 1)
     try {
       await api.post(`/productos/${producto.id}/ajustar-stock`, { delta })
       setCantidades((prev) => ({ ...prev, [producto.id]: '' }))
+      invalidarHistorial(producto.id)
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al ajustar stock')
@@ -156,9 +184,28 @@ export function StockPage() {
       })
       setAgregandoLoteId(null)
       setExpandidos((prev) => new Set(prev).add(productoId))
+      invalidarHistorial(productoId)
       load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al agregar el lote')
+    }
+  }
+
+  const toggleHistorial = async (productoId: string) => {
+    if (historialAbiertoId === productoId) {
+      setHistorialAbiertoId(null)
+      return
+    }
+    setHistorialAbiertoId(productoId)
+    if (historiales[productoId]) return
+    setCargandoHistorialId(productoId)
+    try {
+      const detalle = await api.get<Producto>(`/productos/${productoId}`)
+      setHistoriales((prev) => ({ ...prev, [productoId]: detalle.movimientos ?? [] }))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar el historial')
+    } finally {
+      setCargandoHistorialId(null)
     }
   }
 
@@ -349,6 +396,46 @@ export function StockPage() {
                       </div>
                     </form>
                   )}
+
+                  <div className="flex items-center justify-between border-t pt-3 border-[#17140F]/15 dark:border-[#EDE6D6]/15">
+                    <span className="text-xs text-muted">Historial de movimientos</span>
+                    <button
+                      onClick={() => toggleHistorial(p.id)}
+                      className="text-xs font-bold uppercase tracking-wide link-accent"
+                    >
+                      {historialAbiertoId === p.id ? 'Ocultar' : 'Ver historial'}
+                    </button>
+                  </div>
+
+                  {historialAbiertoId === p.id && (
+                    <>
+                      {cargandoHistorialId === p.id && (
+                        <p className="text-xs text-muted">Cargando...</p>
+                      )}
+                      {cargandoHistorialId !== p.id && (historiales[p.id]?.length ?? 0) === 0 && (
+                        <p className="text-xs text-muted">Todavía no hay movimientos registrados.</p>
+                      )}
+                      {cargandoHistorialId !== p.id && (historiales[p.id]?.length ?? 0) > 0 && (
+                        <ul className="flex flex-col gap-1.5">
+                          {historiales[p.id]!.map((m) => (
+                            <li key={m.id} className="flex items-baseline justify-between text-xs">
+                              <span className="text-secondary">
+                                {TIPO_LABEL[m.tipo]}
+                                <span className="text-muted"> · {m.usuario?.username ?? 'sin registrar'}</span>
+                              </span>
+                              <span className="flex shrink-0 items-baseline gap-2">
+                                <span className={m.cantidad < 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                                  {m.cantidad > 0 ? '+' : ''}
+                                  {m.cantidad} {p.unidad}
+                                </span>
+                                <span className="text-muted">{fmtFechaHora(m.fecha)}</span>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </li>
@@ -449,6 +536,23 @@ export function StockPage() {
               />
               <span className="mt-1 block text-xs text-muted">
                 Se usa para calcular el monto de los pedidos automáticamente.
+              </span>
+            </label>
+
+            <label className="mb-3 block text-sm font-medium text-label">
+              Costo de referencia (opcional)
+              <input
+                name="costo"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={editing?.costo ?? ''}
+                placeholder="$"
+                className="mt-1 w-full rounded-md px-3 py-2 text-base field-input"
+              />
+              <span className="mt-1 block text-xs text-muted">
+                Se actualiza solo con cada compra (promedio ponderado). Cargalo acá para tener un costo base antes
+                de la primera compra registrada — sino el ROI de este producto no se puede calcular.
               </span>
             </label>
 

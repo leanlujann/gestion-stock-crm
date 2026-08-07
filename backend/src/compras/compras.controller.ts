@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ComprasService } from './compras.service';
 import { CreateCompraDto } from './dto/create-compra.dto';
 import { Roles } from '../auth/roles.decorator';
+import { CurrentUser, type UsuarioActual } from '../auth/current-user.decorator';
 
 @Roles('STAFF')
 @Controller('compras')
@@ -19,7 +20,7 @@ export class ComprasController {
   }
 
   @Post()
-  create(@Body() dto: CreateCompraDto) {
-    return this.comprasService.create(dto);
+  create(@Body() dto: CreateCompraDto, @CurrentUser() usuario: UsuarioActual) {
+    return this.comprasService.create(dto, usuario.sub);
   }
 }

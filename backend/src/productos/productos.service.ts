@@ -34,7 +34,11 @@ export class ProductosService {
       include: {
         proveedor: true,
         lotes: { orderBy: { fechaVencimiento: 'asc' } },
-        movimientos: { orderBy: { fecha: 'desc' }, take: 20 },
+        movimientos: {
+          orderBy: { fecha: 'desc' },
+          take: 20,
+          include: { usuario: { select: { username: true } } },
+        },
       },
     });
     if (!producto) throw new NotFoundException('Producto no encontrado');
@@ -52,6 +56,7 @@ export class ProductosService {
         stockActual,
         stockMinimo: dto.stockMinimo ?? 50,
         precio: dto.precio,
+        costo: dto.costo,
         proveedorId: dto.proveedorId,
         lotes: crearLoteInicial
           ? {
@@ -88,7 +93,7 @@ export class ProductosService {
     });
   }
 
-  async addLote(id: string, dto: CreateLoteDto) {
+  async addLote(id: string, dto: CreateLoteDto, usuarioId: string) {
     const producto = await this.findOne(id);
 
     return this.prisma.$transaction(async (tx) => {
@@ -107,7 +112,7 @@ export class ProductosService {
       });
 
       await tx.movimientoStock.create({
-        data: { productoId: id, tipo: 'AJUSTE', cantidad: dto.cantidad },
+        data: { productoId: id, tipo: 'AJUSTE', cantidad: dto.cantidad, usuarioId },
       });
 
       return { ...lote, producto: producto.nombre };
@@ -127,7 +132,7 @@ export class ProductosService {
     });
   }
 
-  async adjustStock(id: string, delta: number) {
+  async adjustStock(id: string, delta: number, usuarioId: string) {
     const producto = await this.findOne(id);
     const nuevoStock = producto.stockActual + delta;
     if (nuevoStock < 0) {
@@ -141,7 +146,7 @@ export class ProductosService {
       });
 
       await tx.movimientoStock.create({
-        data: { productoId: id, tipo: 'AJUSTE', cantidad: delta },
+        data: { productoId: id, tipo: 'AJUSTE', cantidad: delta, usuarioId },
       });
 
       if (actualizado.stockActual < actualizado.stockMinimo) {

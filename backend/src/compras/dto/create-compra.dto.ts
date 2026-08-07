@@ -17,6 +17,11 @@ export class CompraItemDto {
   @IsNumber()
   @IsPositive()
   cantidad!: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  costoUnitario?: number;
 }
 
 export class CreateCompraDto {

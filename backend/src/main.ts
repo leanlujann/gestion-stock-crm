@@ -8,6 +8,7 @@ async function bootstrap() {
     throw new Error('Falta la variable de entorno JWT_SECRET');
   }
   const app = await NestFactory.create(AppModule);
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
   app.enableCors({ origin: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(process.env.PORT ?? 3000);

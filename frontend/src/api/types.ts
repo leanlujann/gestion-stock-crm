@@ -35,6 +35,7 @@ export interface Producto {
   stockActual: number
   stockMinimo: number
   precio: number | null
+  costo: number | null
   activo: boolean
   proveedorId: string | null
   proveedor?: Proveedor | null
@@ -62,6 +63,8 @@ export interface MovimientoStock {
   cantidad: number
   pedidoId: string | null
   compraId: string | null
+  usuarioId: string | null
+  usuario?: { username: string } | null
   fecha: string
 }
 
@@ -72,6 +75,8 @@ export interface PedidoItem {
   producto: Producto
   cantidad: number
   unidad: Unidad
+  precioUnitario: number | null
+  costoUnitarioAlMomento: number | null
 }
 
 export interface Pedido {
@@ -95,6 +100,7 @@ export interface CompraItem {
   producto: Producto
   cantidad: number
   unidad: Unidad
+  costoUnitario: number | null
 }
 
 export interface Compra {
@@ -106,6 +112,24 @@ export interface Compra {
   origen: string
   monto: number | null
   items: CompraItem[]
+}
+
+export interface RoiProducto {
+  productoId: string
+  producto: string
+  mes: string
+  margen: number
+  costoTotal: number
+  roiPct: number | null
+}
+
+export interface RoiCliente {
+  clienteId: string
+  cliente: string
+  mes: string
+  margen: number
+  costoTotal: number
+  roiPct: number | null
 }
 
 export interface Notificacion {

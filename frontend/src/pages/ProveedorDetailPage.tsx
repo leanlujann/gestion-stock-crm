@@ -7,6 +7,7 @@ import { ProductoAutocomplete } from '../components/ProductoAutocomplete'
 interface ItemForm {
   productoId: string
   cantidad: string
+  costoUnitario: string
 }
 
 function fmtMonto(monto: number) {
@@ -22,7 +23,7 @@ export function ProveedorDetailPage() {
   const [proveedor, setProveedor] = useState<Proveedor | null>(null)
   const [productos, setProductos] = useState<Producto[]>([])
   const [showForm, setShowForm] = useState(false)
-  const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '' }])
+  const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '', costoUnitario: '' }])
   const [monto, setMonto] = useState('')
   const [error, setError] = useState('')
 
@@ -42,7 +43,7 @@ export function ProveedorDetailPage() {
   useEffect(load, [id])
 
   const openNuevaCompra = () => {
-    setItems([{ productoId: '', cantidad: '' }])
+    setItems([{ productoId: '', cantidad: '', costoUnitario: '' }])
     setMonto('')
     setError('')
     setShowForm(true)
@@ -51,7 +52,7 @@ export function ProveedorDetailPage() {
   const updateItem = (idx: number, patch: Partial<ItemForm>) => {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)))
   }
-  const addItem = () => setItems((prev) => [...prev, { productoId: '', cantidad: '' }])
+  const addItem = () => setItems((prev) => [...prev, { productoId: '', cantidad: '', costoUnitario: '' }])
   const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx))
 
   const handleSubmit = async () => {
@@ -59,7 +60,11 @@ export function ProveedorDetailPage() {
     setError('')
     const validItems = items
       .filter((it) => it.productoId && it.cantidad)
-      .map((it) => ({ productoId: it.productoId, cantidad: Number(it.cantidad) }))
+      .map((it) => ({
+        productoId: it.productoId,
+        cantidad: Number(it.cantidad),
+        costoUnitario: it.costoUnitario ? Number(it.costoUnitario) : undefined,
+      }))
     if (validItems.length === 0) {
       setError('Agregá al menos un producto')
       return
@@ -144,6 +149,15 @@ export function ProveedorDetailPage() {
                       placeholder={producto?.unidad ?? 'cant.'}
                       value={it.cantidad}
                       onChange={(e) => updateItem(idx, { cantidad: e.target.value })}
+                      className="w-20 rounded-md px-2 py-2 text-sm field-input"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="costo unit."
+                      value={it.costoUnitario}
+                      onChange={(e) => updateItem(idx, { costoUnitario: e.target.value })}
                       className="w-24 rounded-md px-2 py-2 text-sm field-input"
                     />
                     {items.length > 1 && (

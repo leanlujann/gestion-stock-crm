@@ -221,6 +221,24 @@ h1, h2, h3, .heading-display {
     radial-gradient(40% 40% at 10% 85%, rgba(52, 211, 153, 0.45), transparent 70%);
 }
 
+/* ROI: dorado / ambar */
+.bg-scene-roi {
+  background-color: #f8f2e2;
+  background-image:
+    radial-gradient(45% 40% at 22% 22%, rgba(217, 119, 6, 0.2), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(245, 158, 11, 0.2), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(180, 83, 9, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(251, 191, 36, 0.18), transparent 70%);
+}
+[data-theme='dark'] .bg-scene-roi {
+  background-color: #211505;
+  background-image:
+    radial-gradient(45% 40% at 22% 22%, rgba(217, 119, 6, 0.55), transparent 70%),
+    radial-gradient(50% 45% at 85% 18%, rgba(245, 158, 11, 0.5), transparent 70%),
+    radial-gradient(55% 50% at 78% 85%, rgba(180, 83, 9, 0.45), transparent 70%),
+    radial-gradient(40% 40% at 10% 85%, rgba(251, 191, 36, 0.4), transparent 70%);
+}
+
 html, body, #root {
   height: 100%;
 }
@@ -246,7 +264,9 @@ html[data-scene='stock'] { background-color: #eaf7f0; }
 html[data-scene='pedidos'] { background-color: #e9f6f6; }
 html[data-scene='crm'] { background-color: #eaf6f4; }
 html[data-scene='proveedores'] { background-color: #f1f7e6; }
+html[data-scene='roi'] { background-color: #f8f2e2; }
 html[data-theme='dark'][data-scene='stock'] { background-color: #071f1a; }
 html[data-theme='dark'][data-scene='pedidos'] { background-color: #051e24; }
 html[data-theme='dark'][data-scene='crm'] { background-color: #061b26; }
 html[data-theme='dark'][data-scene='proveedores'] { background-color: #10200a; }
+html[data-theme='dark'][data-scene='roi'] { background-color: #211505; }

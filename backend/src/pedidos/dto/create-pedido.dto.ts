@@ -18,6 +18,11 @@ export class PedidoItemDto {
   @IsNumber()
   @IsPositive()
   cantidad!: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  precioUnitario?: number;
 }
 
 export class CreatePedidoDto {

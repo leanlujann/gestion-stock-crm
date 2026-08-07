@@ -25,6 +25,11 @@ export class CreateProductoDto {
   precio?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  costo?: number;
+
+  @IsOptional()
   @IsDateString()
   fechaVencimiento?: string;
 

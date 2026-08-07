@@ -50,6 +50,8 @@ model Usuario {
   clienteId    String?    @unique
   cliente      Cliente?   @relation(fields: [clienteId], references: [id])
   createdAt    DateTime   @default(now())
+
+  movimientos  MovimientoStock[]
 }
 
 model Producto {
@@ -59,6 +61,7 @@ model Producto {
   stockActual  Float    @default(0)
   stockMinimo  Float    @default(50)
   precio       Float?
+  costo        Float?
   activo       Boolean  @default(true)
   proveedorId  String?
   proveedor    Proveedor? @relation(fields: [proveedorId], references: [id])
@@ -124,13 +127,15 @@ model Pedido {
 }
 
 model PedidoItem {
-  id         String   @id @default(cuid())
-  pedidoId   String
-  pedido     Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  productoId String
-  producto   Producto @relation(fields: [productoId], references: [id])
-  cantidad   Float
-  unidad     Unidad
+  id                     String   @id @default(cuid())
+  pedidoId               String
+  pedido                 Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId             String
+  producto               Producto @relation(fields: [productoId], references: [id])
+  cantidad               Float
+  unidad                 Unidad
+  precioUnitario         Float?
+  costoUnitarioAlMomento Float?
 }
 
 model Compra {
@@ -147,13 +152,14 @@ model Compra {
 }
 
 model CompraItem {
-  id         String   @id @default(cuid())
-  compraId   String
-  compra     Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
-  productoId String
-  producto   Producto @relation(fields: [productoId], references: [id])
-  cantidad   Float
-  unidad     Unidad
+  id            String   @id @default(cuid())
+  compraId      String
+  compra        Compra   @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  productoId    String
+  producto      Producto @relation(fields: [productoId], references: [id])
+  cantidad      Float
+  unidad        Unidad
+  costoUnitario Float?
 }
 
 model MovimientoStock {
@@ -166,6 +172,8 @@ model MovimientoStock {
   pedido     Pedido?        @relation(fields: [pedidoId], references: [id])
   compraId   String?
   compra     Compra?        @relation(fields: [compraId], references: [id])
+  usuarioId  String?
+  usuario    Usuario?       @relation(fields: [usuarioId], references: [id])
   fecha      DateTime       @default(now())
 }
 

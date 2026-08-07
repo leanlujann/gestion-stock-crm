@@ -6,6 +6,7 @@ import { ProductoAutocomplete } from '../components/ProductoAutocomplete'
 interface ItemForm {
   productoId: string
   cantidad: string
+  precioUnitario: string
 }
 
 function fmtFecha(iso: string) {
@@ -34,7 +35,7 @@ export function PedidosPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [clienteId, setClienteId] = useState('')
-  const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '' }])
+  const [items, setItems] = useState<ItemForm[]>([{ productoId: '', cantidad: '', precioUnitario: '' }])
   const [error, setError] = useState('')
   const [tab, setTab] = useState<'activos' | 'historial'>('activos')
 
@@ -58,7 +59,7 @@ export function PedidosPage() {
 
   const openNuevo = () => {
     setClienteId('')
-    setItems([{ productoId: '', cantidad: '' }])
+    setItems([{ productoId: '', cantidad: '', precioUnitario: '' }])
     setError('')
     setShowForm(true)
   }
@@ -67,7 +68,7 @@ export function PedidosPage() {
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)))
   }
 
-  const addItem = () => setItems((prev) => [...prev, { productoId: '', cantidad: '' }])
+  const addItem = () => setItems((prev) => [...prev, { productoId: '', cantidad: '', precioUnitario: '' }])
   const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx))
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -79,7 +80,11 @@ export function PedidosPage() {
     }
     const validItems = items
       .filter((it) => it.productoId && it.cantidad)
-      .map((it) => ({ productoId: it.productoId, cantidad: Number(it.cantidad) }))
+      .map((it) => ({
+        productoId: it.productoId,
+        cantidad: Number(it.cantidad),
+        precioUnitario: it.precioUnitario ? Number(it.precioUnitario) : undefined,
+      }))
     if (validItems.length === 0) {
       setError('Agregá al menos un producto')
       return
@@ -112,7 +117,8 @@ export function PedidosPage() {
   const totalEstimado = items.reduce((total, it) => {
     const producto = productos.find((p) => p.id === it.productoId)
     const cantidad = Number(it.cantidad) || 0
-    return total + cantidad * (producto?.precio ?? 0)
+    const precio = it.precioUnitario ? Number(it.precioUnitario) : (producto?.precio ?? 0)
+    return total + cantidad * precio
   }, 0)
 
   const pedidosFiltrados = pedidos.filter((pe) =>
@@ -231,7 +237,16 @@ export function PedidosPage() {
                       placeholder={producto?.unidad ?? 'cant.'}
                       value={it.cantidad}
                       onChange={(e) => updateItem(idx, { cantidad: e.target.value })}
-                      className="w-24 rounded-md px-2 py-2 text-sm field-input"
+                      className="w-20 rounded-md px-2 py-2 text-sm field-input"
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder={producto?.precio != null ? `$${producto.precio}` : 'precio'}
+                      value={it.precioUnitario}
+                      onChange={(e) => updateItem(idx, { precioUnitario: e.target.value })}
+                      className="w-20 rounded-md px-2 py-2 text-sm field-input"
                     />
                     {items.length > 1 && (
                       <button

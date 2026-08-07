@@ -13,6 +13,7 @@ import { UpdateProductoDto } from './dto/update-producto.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { CreateLoteDto } from './dto/create-lote.dto';
 import { Roles } from '../auth/roles.decorator';
+import { CurrentUser, type UsuarioActual } from '../auth/current-user.decorator';
 
 @Roles('STAFF')
 @Controller('productos')
@@ -56,13 +57,13 @@ export class ProductosController {
   }
 
   @Post(':id/ajustar-stock')
-  adjustStock(@Param('id') id: string, @Body() dto: AdjustStockDto) {
-    return this.productosService.adjustStock(id, dto.delta);
+  adjustStock(@Param('id') id: string, @Body() dto: AdjustStockDto, @CurrentUser() usuario: UsuarioActual) {
+    return this.productosService.adjustStock(id, dto.delta, usuario.sub);
   }
 
   @Post(':id/lotes')
-  addLote(@Param('id') id: string, @Body() dto: CreateLoteDto) {
-    return this.productosService.addLote(id, dto);
+  addLote(@Param('id') id: string, @Body() dto: CreateLoteDto, @CurrentUser() usuario: UsuarioActual) {
+    return this.productosService.addLote(id, dto, usuario.sub);
   }
 
   @Delete(':id/lotes/:loteId')

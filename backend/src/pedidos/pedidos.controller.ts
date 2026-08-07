@@ -27,7 +27,7 @@ export class PedidosController {
   @Post('mio')
   crearMio(@CurrentUser() usuario: UsuarioActual, @Body() dto: CrearPedidoClienteDto) {
     if (!usuario.clienteId) throw new BadRequestException('Esta cuenta no tiene un cliente vinculado');
-    return this.pedidosService.crearMio(usuario.clienteId, dto);
+    return this.pedidosService.crearMio(usuario.clienteId, dto, usuario.sub);
   }
 
   @Roles('STAFF')
@@ -38,8 +38,8 @@ export class PedidosController {
 
   @Roles('STAFF')
   @Post()
-  create(@Body() dto: CreatePedidoDto) {
-    return this.pedidosService.create(dto);
+  create(@Body() dto: CreatePedidoDto, @CurrentUser() usuario: UsuarioActual) {
+    return this.pedidosService.create(dto, usuario.sub);
   }
 
   @Roles('STAFF')

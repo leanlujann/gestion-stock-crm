@@ -36,12 +36,12 @@ export class PedidosService {
     return pedido;
   }
 
-  create(dto: CreatePedidoDto) {
-    return this.crearPedido(dto.clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'MANUAL');
+  create(dto: CreatePedidoDto, usuarioId: string) {
+    return this.crearPedido(dto.clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'MANUAL', usuarioId);
   }
 
-  async crearMio(clienteId: string, dto: CrearPedidoClienteDto) {
-    return this.crearPedido(clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'CLIENTE');
+  async crearMio(clienteId: string, dto: CrearPedidoClienteDto, usuarioId: string) {
+    return this.crearPedido(clienteId, dto.items, dto.direccion, dto.fechaEntrega, 'CLIENTE', usuarioId);
   }
 
   private async crearPedido(
@@ -50,6 +50,7 @@ export class PedidosService {
     direccion: string | undefined,
     fechaEntrega: string | undefined,
     origen: OrigenPedido,
+    usuarioId: string,
   ) {
     const cliente = await this.prisma.cliente.findUnique({ where: { id: clienteId } });
     if (!cliente) throw new NotFoundException('Cliente no encontrado');
@@ -72,9 +73,14 @@ export class PedidosService {
       }
     }
 
+    // el override de precioUnitario solo lo puede usar staff (origen MANUAL);
+    // un pedido de CLIENTE siempre cobra el precio de catálogo vigente.
+    const precioEfectivo = (item: PedidoItemDto, producto: { precio: number | null }) =>
+      origen === 'MANUAL' && item.precioUnitario != null ? item.precioUnitario : (producto.precio ?? 0);
+
     const monto = items.reduce((total, item) => {
       const producto = productosPorId.get(item.productoId)!;
-      return total + item.cantidad * (producto.precio ?? 0);
+      return total + item.cantidad * precioEfectivo(item, producto);
     }, 0);
 
     const pedido = await this.prisma.$transaction(async (tx) => {
@@ -86,11 +92,16 @@ export class PedidosService {
           origen,
           fechaEntrega: fechaEntrega ? new Date(fechaEntrega) : undefined,
           items: {
-            create: items.map((item) => ({
-              productoId: item.productoId,
-              cantidad: item.cantidad,
-              unidad: productosPorId.get(item.productoId)!.unidad,
-            })),
+            create: items.map((item) => {
+              const producto = productosPorId.get(item.productoId)!;
+              return {
+                productoId: item.productoId,
+                cantidad: item.cantidad,
+                unidad: producto.unidad,
+                precioUnitario: precioEfectivo(item, producto),
+                costoUnitarioAlMomento: producto.costo,
+              };
+            }),
           },
         },
         include: { cliente: true, items: { include: { producto: true } } },
@@ -109,6 +120,7 @@ export class PedidosService {
             tipo: 'VENTA',
             cantidad: -item.cantidad,
             pedidoId: pedido.id,
+            usuarioId,
           },
         });
 

@@ -8,12 +8,14 @@ const SCENE_COLORS: Record<string, { light: string; dark: string }> = {
   pedidos: { light: '#e9f6f6', dark: '#051e24' },
   crm: { light: '#eaf6f4', dark: '#061b26' },
   proveedores: { light: '#f1f7e6', dark: '#10200a' },
+  roi: { light: '#f8f2e2', dark: '#211505' },
 }
 
 function sceneFromPath(pathname: string) {
   if (pathname.startsWith('/pedidos') || pathname.startsWith('/mis-pedidos')) return 'pedidos'
   if (pathname.startsWith('/clientes')) return 'crm'
   if (pathname.startsWith('/proveedores')) return 'proveedores'
+  if (pathname.startsWith('/roi')) return 'roi'
   return 'stock'
 }
 

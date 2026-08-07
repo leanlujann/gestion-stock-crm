@@ -8,6 +8,7 @@ import { ClientesPage } from './pages/ClientesPage'
 import { ClienteDetailPage } from './pages/ClienteDetailPage'
 import { ProveedoresPage } from './pages/ProveedoresPage'
 import { ProveedorDetailPage } from './pages/ProveedorDetailPage'
+import { RoiPage } from './pages/RoiPage'
 import { NotificacionesPage } from './pages/NotificacionesPage'
 import { CatalogoPage } from './pages/cliente/CatalogoPage'
 import { MisPedidosPage } from './pages/cliente/MisPedidosPage'
@@ -19,6 +20,7 @@ const TABS_STAFF: TabDef[] = [
   { to: '/pedidos', label: 'Pedidos', icon: '🧾' },
   { to: '/clientes', label: 'Clientes', icon: '👥' },
   { to: '/proveedores', label: 'Proveedores', icon: '🚚' },
+  { to: '/roi', label: 'ROI', icon: '📈' },
 ]
 
 const TABS_CLIENTE: TabDef[] = [
@@ -51,6 +53,7 @@ function App() {
             <Route path="/clientes/:id" element={<ClienteDetailPage />} />
             <Route path="/proveedores" element={<ProveedoresPage />} />
             <Route path="/proveedores/:id" element={<ProveedorDetailPage />} />
+            <Route path="/roi" element={<RoiPage />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
           </Route>
         </Routes>

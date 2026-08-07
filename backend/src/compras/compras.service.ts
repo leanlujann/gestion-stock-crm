@@ -22,7 +22,7 @@ export class ComprasService {
     return compra;
   }
 
-  async create(dto: CreateCompraDto) {
+  async create(dto: CreateCompraDto, usuarioId: string) {
     const proveedor = await this.prisma.proveedor.findUnique({ where: { id: dto.proveedorId } });
     if (!proveedor) throw new NotFoundException('Proveedor no encontrado');
 
@@ -47,6 +47,7 @@ export class ComprasService {
               productoId: item.productoId,
               cantidad: item.cantidad,
               unidad: productosPorId.get(item.productoId)!.unidad,
+              costoUnitario: item.costoUnitario,
             })),
           },
         },
@@ -54,9 +55,21 @@ export class ComprasService {
       });
 
       for (const item of dto.items) {
+        const producto = productosPorId.get(item.productoId)!;
+        const nuevoCosto =
+          item.costoUnitario == null
+            ? undefined
+            : producto.costo != null
+              ? (producto.stockActual * producto.costo + item.cantidad * item.costoUnitario) /
+                (producto.stockActual + item.cantidad)
+              : item.costoUnitario;
+
         await tx.producto.update({
           where: { id: item.productoId },
-          data: { stockActual: { increment: item.cantidad } },
+          data: {
+            stockActual: { increment: item.cantidad },
+            ...(nuevoCosto !== undefined ? { costo: nuevoCosto } : {}),
+          },
         });
 
         await tx.movimientoStock.create({
@@ -65,6 +78,7 @@ export class ComprasService {
             tipo: 'COMPRA',
             cantidad: item.cantidad,
             compraId: compra.id,
+            usuarioId,
           },
         });
       }
